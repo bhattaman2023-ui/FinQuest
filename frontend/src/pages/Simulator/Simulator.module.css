@@ -1,0 +1,11 @@
+.page { padding: var(--space-8) 0; }
+.disclaimer {
+  display: flex; align-items: center; gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  background: #FEF3C7; border: 1px solid #FDE68A; border-radius: var(--radius-md);
+  font-size: var(--text-sm); color: #92400E; margin-bottom: var(--space-8);
+}
+[data-theme="dark"] .disclaimer { background: rgba(183,121,31,0.15); border-color: rgba(183,121,31,0.3); color: var(--color-accent); }
+.comingSoon { text-align: center; padding: var(--space-20) 0; color: var(--color-muted); }
+.comingSoon h1 { font-family: var(--font-serif); font-size: var(--text-2xl); color: var(--color-ink); margin: var(--space-4) 0 var(--space-3); }
+.comingSoon p { font-size: var(--text-md); }

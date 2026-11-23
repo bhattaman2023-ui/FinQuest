@@ -1,0 +1,103 @@
+/* =============================================================
+   FINQUEST DESIGN TOKENS
+   Single source of truth — imported first in global.css
+   ============================================================= */
+
+:root {
+  /* ── Colour Palette ───────────────────────────────────────── */
+  --color-bg:          #F7F7F5;   /* warm stone */
+  --color-surface:     #FFFFFF;
+  --color-sage:        #EDF3EF;   /* hero, simulator panels */
+  --color-ink:         #1B1B18;   /* near-black warm */
+  --color-muted:       #6B6A63;
+  --color-hairline:    #E6E4DE;
+  --color-accent:      #B7791F;   /* amber-gold — use sparingly */
+  --color-gain:        #2F7D5B;   /* muted green */
+  --color-loss:        #B4443C;   /* brick red */
+
+  /* ── Dark Theme Palette (applied via [data-theme="dark"]) ─── */
+  /* Defined below in [data-theme="dark"] block */
+
+  /* ── Typography ──────────────────────────────────────────── */
+  --font-serif:  'Newsreader', Georgia, serif;
+  --font-ui:     'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+  --font-mono:   'JetBrains Mono', 'Fira Code', monospace;
+
+  /* Type scale */
+  --text-xs:   0.75rem;    /* 12px */
+  --text-sm:   0.875rem;   /* 14px */
+  --text-base: 1rem;       /* 16px */
+  --text-md:   1.125rem;   /* 18px */
+  --text-lg:   1.25rem;    /* 20px */
+  --text-xl:   1.5rem;     /* 24px */
+  --text-2xl:  2rem;       /* 32px */
+  --text-3xl:  2.5rem;     /* 40px */
+  --text-4xl:  3.25rem;    /* 52px */
+  --text-5xl:  4rem;       /* 64px */
+
+  --leading-tight:  1.2;
+  --leading-snug:   1.35;
+  --leading-normal: 1.6;
+  --leading-loose:  1.75;
+
+  /* Lesson body: 60–75 chars wide */
+  --lesson-measure: 68ch;
+
+  /* ── Spacing (4px base) ──────────────────────────────────── */
+  --space-1:   0.25rem;   /* 4px  */
+  --space-2:   0.5rem;    /* 8px  */
+  --space-3:   0.75rem;   /* 12px */
+  --space-4:   1rem;      /* 16px */
+  --space-5:   1.25rem;   /* 20px */
+  --space-6:   1.5rem;    /* 24px */
+  --space-8:   2rem;      /* 32px */
+  --space-10:  2.5rem;    /* 40px */
+  --space-12:  3rem;      /* 48px */
+  --space-16:  4rem;      /* 64px */
+  --space-20:  5rem;      /* 80px */
+  --space-24:  6rem;      /* 96px */
+
+  /* ── Border Radius ───────────────────────────────────────── */
+  --radius-sm:   4px;
+  --radius-md:   6px;
+  --radius-lg:   10px;
+  --radius-pill: 9999px;
+  --radius-brand: 8px;   /* brand icon square */
+
+  /* ── Shadows (almost none — hairlines do separation) ──────── */
+  --shadow-xs:  0 1px 2px rgba(27, 27, 24, 0.06);
+  --shadow-sm:  0 2px 6px rgba(27, 27, 24, 0.08);
+
+  /* ── Transitions ─────────────────────────────────────────── */
+  --transition-fast:   120ms ease;
+  --transition-base:   180ms ease;
+  --transition-slow:   250ms ease;
+
+  /* ── Z-index ─────────────────────────────────────────────── */
+  --z-base:    0;
+  --z-raised:  10;
+  --z-overlay: 100;
+  --z-modal:   200;
+  --z-toast:   300;
+
+  /* ── Layout ──────────────────────────────────────────────── */
+  --header-height:  60px;
+  --ticker-height:  36px;
+  --sidebar-width:  260px;
+  --content-max:    1200px;
+}
+
+/* ── Dark Theme ───────────────────────────────────────────── */
+[data-theme="dark"] {
+  --color-bg:       #1E1D1A;   /* warm charcoal — not pure black */
+  --color-surface:  #2A2926;
+  --color-sage:     #242B25;
+  --color-ink:      #F0EFE9;
+  --color-muted:    #9A9892;
+  --color-hairline: #3A3834;
+  --color-accent:   #D4973A;   /* slightly warmer amber in dark */
+  --color-gain:     #3A9E71;
+  --color-loss:     #C95C52;
+  --shadow-xs:      0 1px 3px rgba(0, 0, 0, 0.3);
+  --shadow-sm:      0 2px 8px rgba(0, 0, 0, 0.35);
+}

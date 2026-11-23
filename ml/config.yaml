@@ -1,0 +1,65 @@
+# ============================================================
+# FINQUEST ML Configuration
+# Used by train.py and serve.py
+# ============================================================
+
+# ── Symbols to train on ──────────────────────────────────────
+symbols:
+  - RELIANCE.NS
+  - TCS.NS
+  - INFY.NS
+  - HDFCBANK.NS
+  - ICICIBANK.NS
+  - ITC.NS
+  - SBIN.NS
+  - LT.NS
+
+# ── Data settings ────────────────────────────────────────────
+data:
+  start_date: "2019-01-01"
+  end_date: "2024-12-31"
+  source: "yfinance"           # yfinance | db | synthetic
+  adjustment: "auto"           # yfinance auto-adjust flag
+
+# ── Label settings ───────────────────────────────────────────
+labels:
+  horizon_days: 5              # forward-looking period (trading days)
+  up_threshold: 0.02           # +2% → UP
+  down_threshold: -0.02        # -2% → DOWN
+  # else → SIDEWAYS
+
+# ── Feature settings ─────────────────────────────────────────
+features:
+  moving_averages: [5, 10, 20, 50]
+  rsi_window: 14
+  macd_fast: 12
+  macd_slow: 26
+  macd_signal: 9
+  volatility_window: 10
+  volume_change_window: 5
+
+# ── Train/test split ─────────────────────────────────────────
+split:
+  method: "chronological"      # MUST be chronological — never random
+  test_ratio: 0.20
+  val_ratio: 0.10              # validation taken from end of train
+
+# ── Model ────────────────────────────────────────────────────
+model:
+  type: "RandomForestClassifier"
+  n_estimators: 300
+  max_depth: 8
+  min_samples_leaf: 20
+  class_weight: "balanced"
+  random_state: 42
+  n_jobs: -1
+
+# ── Calibration ──────────────────────────────────────────────
+calibration:
+  enabled: true
+  method: "sigmoid"            # sigmoid | isotonic
+
+# ── Output ───────────────────────────────────────────────────
+output:
+  model_dir: "models"
+  model_version: "v1"          # bump when retraining
