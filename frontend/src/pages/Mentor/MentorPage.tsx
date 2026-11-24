@@ -205,7 +205,7 @@ export default function MentorPage() {
     try {
       const res = await api.post('/mentor/chat', {
         message: text,
-        sessionId: activeSessionId,
+        ...(activeSessionId ? { sessionId: activeSessionId } : {}),
       });
       const data = res.data;
 
