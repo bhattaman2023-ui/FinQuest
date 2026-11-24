@@ -178,12 +178,12 @@ In the meantime, you can:
       response?: { status?: number; data?: { error?: string; message?: string } };
       code?: string;
     };
-    const providerMessage = error.response?.data?.error ?? error.response?.data?.message ?? '';
+    const providerDetails = JSON.stringify(error.response?.data ?? '');
     if (
       (error.response?.status === 400 || error.response?.status === 401 || error.response?.status === 403) &&
-      /api key/i.test(providerMessage)
+      /api key/i.test(providerDetails)
     ) {
-      return res.status(502).json({ error: 'AI_AUTH_FAILED', message: 'The AI provider rejected the API key. Set a valid xAI key as AI_API_KEY in backend/.env.' });
+      return res.status(502).json({ error: 'AI_AUTH_FAILED', message: 'The AI provider rejected the API key. Check that AI_API_KEY and the provider settings in backend/.env are correct.' });
     }
     if (error.response?.status === 429) {
       return res.status(429).json({ error: 'AI_RATE_LIMIT', message: 'AI provider is rate-limited. Try again shortly.' });
