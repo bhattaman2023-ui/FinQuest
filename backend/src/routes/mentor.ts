@@ -174,9 +174,25 @@ In the meantime, you can:
     res.json({ response, sessionId: activeSessionId, fallback: false });
   } catch (err) {
     // Handle AI provider errors gracefully
-    const error = err as { response?: { status?: number }; code?: string };
+    const error = err as {
+      response?: { status?: number; data?: { error?: string; message?: string } };
+      code?: string;
+    };
+    const providerMessage = error.response?.data?.error ?? error.response?.data?.message ?? '';
+    if (
+      (error.response?.status === 400 || error.response?.status === 401 || error.response?.status === 403) &&
+      /api key/i.test(providerMessage)
+    ) {
+      return res.status(502).json({ error: 'AI_AUTH_FAILED', message: 'The AI provider rejected the API key. Set a valid xAI key as AI_API_KEY in backend/.env.' });
+    }
     if (error.response?.status === 429) {
       return res.status(429).json({ error: 'AI_RATE_LIMIT', message: 'AI provider is rate-limited. Try again shortly.' });
+    }
+    if (error.response?.status === 503) {
+      return res.status(503).json({ error: 'AI_UNAVAILABLE', message: 'The AI provider is temporarily overloaded. Please try again shortly.' });
+    }
+    if (error.response?.status === 404) {
+      return res.status(502).json({ error: 'AI_MODEL_UNAVAILABLE', message: 'The configured AI model is unavailable. Check AI_MODEL in backend/.env.' });
     }
     if (error.code === 'ECONNABORTED' || error.code === 'ETIMEDOUT') {
       return res.status(504).json({ error: 'AI_TIMEOUT', message: 'AI provider timed out. Try again.' });

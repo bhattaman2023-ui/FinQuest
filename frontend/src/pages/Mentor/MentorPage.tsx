@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import axios from 'axios';
 import { Send, Plus, Trash2, MessageCircle, AlertCircle, BookOpen } from 'lucide-react';
 import api from '@/api/client';
 import { formatDateTimeIST } from '@/lib/formatters';
@@ -224,10 +225,13 @@ export default function MentorPage() {
       qc.invalidateQueries({ queryKey: ['mentor-sessions'] });
       if (activeSessionId) qc.invalidateQueries({ queryKey: ['mentor-session', activeSessionId] });
 
-    } catch {
+    } catch (error) {
+      const message = axios.isAxiosError<{ message?: string }>(error)
+        ? error.response?.data?.message
+        : undefined;
       setLocalMessages(prev => [...prev, {
         id: `err-${Date.now()}`, role: 'assistant',
-        content: 'Sorry, I could not reach the AI service right now. Please try again.',
+        content: message ?? 'Sorry, I could not reach the AI service right now. Please try again.',
         created_at: new Date().toISOString(),
       }]);
     } finally {
