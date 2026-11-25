@@ -1,9 +1,130 @@
 import { Router } from 'express';
-import { query } from '../db/pool';
+import { query, withTransaction } from '../db/pool';
 import { requireAuth, AuthRequest } from '../middleware/auth';
 import { createError } from '../middleware/errorHandler';
 
 export const coursesRouter = Router();
+
+type CertificateEligibility = {
+  totalLessons: number;
+  completedLessons: number;
+  totalQuizzes: number;
+  passedQuizzes: number;
+  eligible: boolean;
+};
+
+async function getCertificateEligibility(userId: string): Promise<CertificateEligibility> {
+  type LessonCountRow = { total: string; completed: string };
+  const lessonCounts = await query<LessonCountRow>(
+    `SELECT
+       COUNT(DISTINCT l.id)::TEXT AS total,
+       COUNT(DISTINCT CASE WHEN ulp.completed THEN l.id END)::TEXT AS completed
+     FROM lessons l
+     JOIN courses c ON c.id = l.course_id
+     LEFT JOIN user_lesson_progress ulp ON ulp.lesson_id = l.id AND ulp.user_id = $1
+     WHERE l.is_published = true AND c.is_published = true`,
+    [userId]
+  );
+  type QuizCountRow = { total: string; passed: string };
+  const quizCounts = await query<QuizCountRow>(
+    `SELECT
+       COUNT(DISTINCT q.id)::TEXT AS total,
+       COUNT(DISTINCT CASE WHEN qa.passed THEN q.id END)::TEXT AS passed
+     FROM quizzes q
+     JOIN lessons l ON l.id = q.lesson_id
+     JOIN courses c ON c.id = l.course_id
+     LEFT JOIN (
+       SELECT DISTINCT ON (user_id, quiz_id) user_id, quiz_id, passed
+       FROM quiz_attempts WHERE user_id = $1
+       ORDER BY user_id, quiz_id, score DESC
+     ) qa ON qa.quiz_id = q.id
+     WHERE l.is_published = true AND c.is_published = true`,
+    [userId]
+  );
+
+  const totalLessons = parseInt(lessonCounts.rows[0].total, 10);
+  const completedLessons = parseInt(lessonCounts.rows[0].completed, 10);
+  const totalQuizzes = parseInt(quizCounts.rows[0].total, 10);
+  const passedQuizzes = parseInt(quizCounts.rows[0].passed, 10);
+  return {
+    totalLessons,
+    completedLessons,
+    totalQuizzes,
+    passedQuizzes,
+    eligible: totalLessons > 0
+      && completedLessons === totalLessons
+      && (totalQuizzes === 0 || passedQuizzes === totalQuizzes),
+  };
+}
+
+// ── GET /api/courses/glossary/all ────────────────────────────────
+// MUST be before /:slug to avoid being caught by the dynamic route
+coursesRouter.get('/glossary/all', requireAuth, async (req: AuthRequest, res, next) => {
+  try {
+    const { q, category } = req.query;
+    let sql = `SELECT id, term, definition, category, example FROM glossary_terms WHERE 1=1`;
+    const params: unknown[] = [];
+    if (q) { params.push(`%${q}%`); sql += ` AND (LOWER(term) LIKE LOWER($${params.length}) OR LOWER(definition) LIKE LOWER($${params.length}))`; }
+    if (category) { params.push(category); sql += ` AND category = $${params.length}`; }
+    sql += ` ORDER BY term`;
+    const { rows } = await query(sql, params);
+    res.json(rows);
+  } catch (err) { next(err); }
+});
+
+// ── GET /api/courses/certificate/status ──────────────────────────
+// MUST be before /:slug to avoid being caught by the dynamic route
+coursesRouter.get('/certificate/status', requireAuth, async (req: AuthRequest, res, next) => {
+  try {
+    const userId = req.user!.id;
+    const eligibility = await getCertificateEligibility(userId);
+
+    // Check existing certificate
+    type CertRow = { id: string; verification_id: string; issued_at: string };
+    const certR = await query<CertRow>(
+      `SELECT id, verification_id, issued_at FROM certificates WHERE user_id=$1 ORDER BY issued_at DESC LIMIT 1`,
+      [userId]
+    );
+
+    res.json({
+      ...eligibility,
+      certificate:    certR.rows[0] ?? null,
+    });
+  } catch (err) { next(err); }
+});
+
+// ── POST /api/courses/certificate/issue ──────────────────────────
+// MUST be before /:slug/:lessonSlug to avoid route conflict
+coursesRouter.post('/certificate/issue', requireAuth, async (req: AuthRequest, res, next) => {
+  try {
+    const userId = req.user!.id;
+    const eligibility = await getCertificateEligibility(userId);
+    if (!eligibility.eligible) {
+      throw createError('Complete all lessons and pass all quizzes before issuing a certificate.', 403, 'NOT_ELIGIBLE');
+    }
+
+    // Serialize issuance per user so concurrent requests cannot create duplicates.
+    type CertRow = { id: string; verification_id: string; issued_at: string };
+    const result = await withTransaction(async (client) => {
+      await client.query('SELECT id FROM users WHERE id=$1 FOR UPDATE', [userId]);
+      const existing = await client.query<CertRow>(
+        `SELECT id, verification_id, issued_at FROM certificates
+         WHERE user_id=$1 ORDER BY issued_at DESC LIMIT 1`,
+        [userId]
+      );
+      if (existing.rows.length > 0) return { certificate: existing.rows[0], created: false };
+
+      const inserted = await client.query<CertRow>(
+        `INSERT INTO certificates (user_id) VALUES ($1)
+         RETURNING id, verification_id, issued_at`,
+        [userId]
+      );
+      return { certificate: inserted.rows[0], created: true };
+    });
+
+    res.status(result.created ? 201 : 200).json(result.certificate);
+  } catch (err) { next(err); }
+});
 
 // ── GET /api/courses ─────────────────────────────────────────────
 // List all published courses with progress for authenticated user
@@ -314,111 +435,4 @@ coursesRouter.post('/:courseSlug/:lessonSlug/quiz', requireAuth, async (req: Aut
   } catch (err) { next(err); }
 });
 
-// ── GET /api/courses/glossary/all ────────────────────────────────
-coursesRouter.get('/glossary/all', requireAuth, async (req: AuthRequest, res, next) => {
-  try {
-    const { q, category } = req.query;
-    let sql = `SELECT id, term, definition, category, example FROM glossary_terms WHERE 1=1`;
-    const params: unknown[] = [];
-    if (q) { params.push(`%${q}%`); sql += ` AND (LOWER(term) LIKE LOWER($${params.length}) OR LOWER(definition) LIKE LOWER($${params.length}))`; }
-    if (category) { params.push(category); sql += ` AND category = $${params.length}`; }
-    sql += ` ORDER BY term`;
-    const { rows } = await query(sql, params);
-    res.json(rows);
-  } catch (err) { next(err); }
-});
-
-// ── GET /api/courses/certificate/status ──────────────────────────
-coursesRouter.get('/certificate/status', requireAuth, async (req: AuthRequest, res, next) => {
-  try {
-    const userId = req.user!.id;
-
-    // Count total required lessons and completed ones
-    type CountRow = { total: string; completed: string };
-    const cr = await query<CountRow>(
-      `SELECT
-         COUNT(DISTINCT l.id)::TEXT AS total,
-         COUNT(DISTINCT CASE WHEN ulp.completed THEN l.id END)::TEXT AS completed
-       FROM lessons l
-       JOIN courses c ON c.id = l.course_id
-       LEFT JOIN user_lesson_progress ulp ON ulp.lesson_id = l.id AND ulp.user_id = $1
-       WHERE l.is_published = true AND c.is_published = true`,
-      [userId]
-    );
-    const { total, completed } = cr.rows[0];
-
-    // Check all quizzes passed
-    type QuizCountRow = { total_quizzes: string; passed_quizzes: string };
-    const qc = await query<QuizCountRow>(
-      `SELECT
-         COUNT(DISTINCT q.id)::TEXT AS total_quizzes,
-         COUNT(DISTINCT CASE WHEN qa.passed THEN q.id END)::TEXT AS passed_quizzes
-       FROM quizzes q
-       JOIN lessons l ON l.id = q.lesson_id
-       LEFT JOIN (
-         SELECT DISTINCT ON (user_id, quiz_id) user_id, quiz_id, passed
-         FROM quiz_attempts WHERE user_id=$1
-         ORDER BY user_id, quiz_id, score DESC
-       ) qa ON qa.quiz_id = q.id
-       WHERE l.is_published = true`,
-      [userId]
-    );
-    const { total_quizzes, passed_quizzes } = qc.rows[0];
-
-    const lessonsComplete = parseInt(total, 10) > 0 && parseInt(completed, 10) === parseInt(total, 10);
-    const quizzesComplete = parseInt(total_quizzes, 10) === 0 || parseInt(passed_quizzes, 10) === parseInt(total_quizzes, 10);
-    const eligible = lessonsComplete && quizzesComplete;
-
-    // Check existing certificate
-    type CertRow = { id: string; verification_id: string; issued_at: string };
-    const certR = await query<CertRow>(
-      `SELECT id, verification_id, issued_at FROM certificates WHERE user_id=$1 ORDER BY issued_at DESC LIMIT 1`,
-      [userId]
-    );
-
-    res.json({
-      eligible,
-      totalLessons:   parseInt(total, 10),
-      completedLessons: parseInt(completed, 10),
-      totalQuizzes:   parseInt(total_quizzes, 10),
-      passedQuizzes:  parseInt(passed_quizzes, 10),
-      certificate:    certR.rows[0] ?? null,
-    });
-  } catch (err) { next(err); }
-});
-
-// ── POST /api/courses/certificate/issue ──────────────────────────
-coursesRouter.post('/certificate/issue', requireAuth, async (req: AuthRequest, res, next) => {
-  try {
-    const userId = req.user!.id;
-
-    // Verify eligibility (re-check server side)
-    type CountRow = { total: string; completed: string };
-    const cr = await query<CountRow>(
-      `SELECT COUNT(DISTINCT l.id)::TEXT AS total, COUNT(DISTINCT CASE WHEN ulp.completed THEN l.id END)::TEXT AS completed
-       FROM lessons l JOIN courses c ON c.id=l.course_id LEFT JOIN user_lesson_progress ulp ON ulp.lesson_id=l.id AND ulp.user_id=$1
-       WHERE l.is_published=true AND c.is_published=true`,
-      [userId]
-    );
-    const { total, completed } = cr.rows[0];
-    if (parseInt(total, 10) === 0 || parseInt(completed, 10) < parseInt(total, 10)) {
-      throw createError('Complete all lessons before issuing a certificate.', 403, 'NOT_ELIGIBLE');
-    }
-
-    // Issue (idempotent)
-    type CertRow = { id: string; verification_id: string; issued_at: string };
-    const r = await query<CertRow>(
-      `INSERT INTO certificates (user_id) VALUES ($1)
-       ON CONFLICT DO NOTHING RETURNING id, verification_id, issued_at`,
-      [userId]
-    );
-
-    if (r.rows.length === 0) {
-      // Already issued
-      const existing = await query<CertRow>(`SELECT id, verification_id, issued_at FROM certificates WHERE user_id=$1`, [userId]);
-      return res.json(existing.rows[0]);
-    }
-
-    res.status(201).json(r.rows[0]);
-  } catch (err) { next(err); }
-});
+// (Moved above /:slug — see top of file)

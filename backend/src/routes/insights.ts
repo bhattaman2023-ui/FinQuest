@@ -316,7 +316,7 @@ insightsRouter.get('/trade-review', requireAuth, async (req: AuthRequest, res, n
   try {
     const userId = req.user!.id;
 
-    type OrderRow = { symbol: string; side: string; quantity: number; price: string; total: string; created_at: string };
+    type OrderRow = { symbol: string; side: string; quantity: number; price: string; total: string; created_at: string | Date };
     const { rows: orders } = await query<OrderRow>(
       `SELECT symbol, side, quantity, price, total, created_at
        FROM orders WHERE user_id=$1 AND status='FILLED' ORDER BY created_at DESC`,
@@ -332,7 +332,11 @@ insightsRouter.get('/trade-review', requireAuth, async (req: AuthRequest, res, n
     // Overtrading: more than 10 trades in a day
     const tradeDays: Record<string, number> = {};
     for (const o of orders) {
-      const day = o.created_at.split('T')[0];
+      // created_at may be a Date object (PGlite) or ISO string (pg) — normalise to string
+      const createdAtStr = o.created_at instanceof Date
+        ? o.created_at.toISOString()
+        : String(o.created_at);
+      const day = createdAtStr.split('T')[0];
       tradeDays[day] = (tradeDays[day] ?? 0) + 1;
     }
     const maxPerDay = Math.max(...Object.values(tradeDays));

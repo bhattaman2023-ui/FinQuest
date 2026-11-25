@@ -9,7 +9,7 @@
     "build": "tsc",
     "migrate": "node --require ts-node/register src/db/migrate.ts",
     "seed": "node --require ts-node/register src/db/seed.ts",
-    "test": "jest --forceExit"
+    "test": "node --experimental-vm-modules ./node_modules/jest/bin/jest.js --forceExit"
   },
   "dependencies": {
     "@electric-sql/pglite": "^0.6.0",
@@ -26,6 +26,7 @@
     "pdfkit": "^0.15.0",
     "pg": "^8.12.0",
     "uuid": "^10.0.0",
+    "winston": "^3.19.0",
     "zod": "^3.23.8"
   },
   "devDependencies": {

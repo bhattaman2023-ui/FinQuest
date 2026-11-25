@@ -59,6 +59,7 @@ venv/
 
 # ── PostgreSQL portable (do NOT commit the binaries or data) ──────────────────
 pgportable/
+backend/.local-data/
 
 # ── Misc ──────────────────────────────────────────────────────────────────────
 *.zip

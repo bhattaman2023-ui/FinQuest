@@ -4,9 +4,6 @@
 -- All migrations are ADDITIVE (no drops, no data loss).
 -- ============================================================
 
--- Enable UUID generation
-CREATE EXTENSION IF NOT EXISTS "pgcrypto";
-
 -- ── Auth ─────────────────────────────────────────────────────────
 CREATE TABLE IF NOT EXISTS users (
   id              UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -103,7 +100,7 @@ CREATE INDEX IF NOT EXISTS idx_quiz_attempts_user ON quiz_attempts(user_id);
 CREATE TABLE IF NOT EXISTS certificates (
   id              UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id         UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-  verification_id TEXT NOT NULL UNIQUE DEFAULT encode(gen_random_bytes(12), 'hex'),
+  verification_id TEXT NOT NULL UNIQUE DEFAULT replace(gen_random_uuid()::text, '-', ''),
   issued_at       TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 

@@ -12,8 +12,11 @@ India's educational financial-literacy and stock-market simulation platform for 
 
 ### Prerequisites
 - Node.js 20+ and npm
-- PostgreSQL 15+ (create database: `createdb finquest`)
+- PostgreSQL 15+ (create database: `createdb finquest`) or the bundled PGlite local database
 - Python 3.11+ (for ML service)
+
+For local development without PostgreSQL, set `DB_DRIVER=pglite` in `backend/.env`.
+The embedded database persists under `backend/.local-data/`.
 
 ### 1 — Setup environment variables
 
