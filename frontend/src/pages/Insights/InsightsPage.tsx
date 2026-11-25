@@ -3,7 +3,7 @@ import { useQuery } from '@tanstack/react-query';
 import {
   LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, ReferenceLine,
 } from 'recharts';
-import { AlertCircle, Brain, TrendingUp, BarChart2, Shield, FileText } from 'lucide-react';
+import { AlertCircle, Brain, TrendingUp, BarChart2, Shield, FileText, type LucideIcon } from 'lucide-react';
 import api from '@/api/client';
 import { formatINR, formatPercent } from '@/lib/formatters';
 import { PageSpinner } from '@/components/ui/PageSpinner';
@@ -14,7 +14,7 @@ type TabId = 'performance' | 'indicators' | 'ml' | 'risk' | 'review';
 
 const SYMBOLS = ['RELIANCE', 'TCS', 'INFY', 'HDFCBANK', 'ICICIBANK', 'ITC', 'SBIN', 'LT'];
 
-const TABS: { id: TabId; label: string; icon: React.ComponentType<{ size?: number }> }[] = [
+const TABS: { id: TabId; label: string; icon: LucideIcon }[] = [
   { id: 'performance', label: 'Stock Performance', icon: TrendingUp },
   { id: 'indicators',  label: 'Technical Indicators', icon: BarChart2 },
   { id: 'ml',         label: 'ML Classifier',   icon: Brain },
@@ -411,13 +411,13 @@ function ReviewTab() {
 
           <div style={{ background: 'var(--color-surface)', border: '1px solid var(--color-hairline)', borderRadius: 'var(--radius-md)', padding: 'var(--space-5)' }}>
             <h3 style={{ fontFamily: 'var(--font-serif)', fontSize: 'var(--text-lg)', fontWeight: 500, marginBottom: 'var(--space-5)' }}>Behavioural Observations</h3>
-            {data.flags?.length === 0 || data.summary ? (
-              <p style={{ color: 'var(--color-muted)', fontSize: 'var(--text-sm)' }}>{data.summary ?? 'No flags yet.'}</p>
-            ) : (
+            {data.summary && (
+              <p style={{ color: 'var(--color-muted)', fontSize: 'var(--text-sm)', marginBottom: 'var(--space-4)' }}>{data.summary}</p>
+            )}
+            {data.flags?.length ? (
               <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-4)' }}>
                 {data.flags?.map((flag: string, i: number) => {
                   const isWarning = flag.startsWith('⚠️');
-                  const isInfo    = flag.startsWith('ℹ️');
                   const isOk      = flag.startsWith('✅');
                   const bg = isOk ? 'rgba(47,125,91,0.06)' : isWarning ? 'rgba(180,68,60,0.06)' : 'rgba(183,121,31,0.06)';
                   const border = isOk ? 'rgba(47,125,91,0.3)' : isWarning ? 'rgba(180,68,60,0.3)' : 'rgba(183,121,31,0.3)';
@@ -428,6 +428,8 @@ function ReviewTab() {
                   );
                 })}
               </div>
+            ) : !data.summary && (
+              <p style={{ color: 'var(--color-muted)', fontSize: 'var(--text-sm)' }}>No flags yet.</p>
             )}
           </div>
         </>
@@ -439,7 +441,6 @@ function ReviewTab() {
 // ── Main page ─────────────────────────────────────────────────────────
 export default function InsightsPage() {
   const [activeTab, setActiveTab] = useState<TabId>('performance');
-  const ActiveIcon = TABS.find(t => t.id === activeTab)?.icon ?? TrendingUp;
 
   return (
     <div style={{ padding: 'var(--space-8) var(--space-6)', maxWidth: 'var(--content-max)', margin: '0 auto' }}>

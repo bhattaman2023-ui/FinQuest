@@ -1,9 +1,8 @@
 import { useState } from 'react';
-import { NavLink, Link, useNavigate } from 'react-router-dom';
+import { NavLink, Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import {
-  Sun, Moon, Bell, ChevronDown, Menu, X,
-  Calculator, FileText, Globe, User, LogOut
+  Sun, Moon, Bell, Menu, X, Calculator, Globe
 } from 'lucide-react';
 import clsx from 'clsx';
 import useThemeStore from '@/store/themeStore';
@@ -24,7 +23,6 @@ export default function Header() {
   const { theme, toggleTheme } = useThemeStore();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [toolsOpen, setToolsOpen] = useState(false);
-  const navigate = useNavigate();
 
   const toggleLanguage = () => {
     i18n.changeLanguage(i18n.language === 'en' ? 'hi' : 'en');

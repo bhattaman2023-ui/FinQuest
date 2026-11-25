@@ -1,6 +1,5 @@
 import { Link } from 'react-router-dom';
 import { ArrowRight, TrendingUp, BookOpen, BarChart2 } from 'lucide-react';
-import Header from '@/components/layout/Header';
 import TickerStrip from '@/components/layout/TickerStrip';
 import Footer from '@/components/layout/Footer';
 import { formatINR } from '@/lib/formatters';

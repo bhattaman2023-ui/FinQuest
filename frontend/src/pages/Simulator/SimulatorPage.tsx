@@ -54,7 +54,7 @@ export default function SimulatorPage() {
           <div style={{ maxHeight: 480, overflowY: 'auto' }}>
             {filtered.map(s => (
               <button key={s.symbol} onClick={() => setSelected(s)}
-                style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: 'var(--space-3) var(--space-4)', borderBottom: '1px solid var(--color-hairline)', background: selected?.symbol === s.symbol ? 'var(--color-sage)' : 'transparent', cursor: 'pointer', textAlign: 'left', border: 'none', borderBottom: '1px solid var(--color-hairline)' }}>
+                style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: 'var(--space-3) var(--space-4)', background: selected?.symbol === s.symbol ? 'var(--color-sage)' : 'transparent', cursor: 'pointer', textAlign: 'left', border: 'none', borderBottom: '1px solid var(--color-hairline)' }}>
                 <div>
                   <div style={{ fontSize: 'var(--text-sm)', fontWeight: 700, color: 'var(--color-ink)' }}>{s.symbol}</div>
                   <div style={{ fontSize: 'var(--text-xs)', color: 'var(--color-muted)' }}>{s.sector}</div>

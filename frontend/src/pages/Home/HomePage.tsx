@@ -1,7 +1,6 @@
-import { useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
-import { TrendingUp, BookOpen, Award, Zap } from 'lucide-react';
+import { TrendingUp, BookOpen, Award } from 'lucide-react';
 import api from '@/api/client';
 import useAuthStore from '@/store/authStore';
 import { formatINR, formatPercent, gainLossClass } from '@/lib/formatters';
@@ -11,7 +10,7 @@ import { ErrorState } from '@/components/ui/States';
 export default function HomePage() {
   const { user } = useAuthStore();
 
-  const { data: portfolio, isLoading: portLoading, isError: portError } = useQuery({
+  const { data: portfolio, isLoading: portLoading, isError: portError, refetch } = useQuery({
     queryKey: ['portfolio-summary'],
     queryFn: () => api.get('/portfolio/summary').then(r => r.data),
     retry: 1,
@@ -30,6 +29,7 @@ export default function HomePage() {
   });
 
   if (portLoading) return <PageSpinner />;
+  if (portError) return <ErrorState message="Could not load your portfolio." onRetry={refetch} />;
 
   const isNewUser = !portfolio || (portfolio.totalValue === 100000 && portfolio.holdings?.length === 0);
 

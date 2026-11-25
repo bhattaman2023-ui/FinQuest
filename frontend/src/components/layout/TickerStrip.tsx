@@ -1,11 +1,17 @@
-import { useEffect, useRef, useState } from 'react';
-import { useTranslation } from 'react-i18next';
-import { formatINR, formatPercent, formatDateIST } from '@/lib/formatters';
+import { useEffect, useState } from 'react';
+import { formatDateIST } from '@/lib/formatters';
 import styles from './TickerStrip.module.css';
+
+interface TickerItem {
+  symbol: string;
+  value: number;
+  change: number;
+  type: 'SIMULATED' | 'HISTORICAL' | 'LIVE';
+}
 
 // Seed data — served by backend /api/market/ticker
 // Until connected, we display clearly labelled HISTORICAL data.
-const SEED_TICKERS = [
+const SEED_TICKERS: TickerItem[] = [
   { symbol: 'NIFTY 50',   value: 24180.80, change: 0.62,  type: 'HISTORICAL' },
   { symbol: 'SENSEX',     value: 79748.63, change: 0.58,  type: 'HISTORICAL' },
   { symbol: 'NIFTY BANK', value: 51842.30, change: -0.21, type: 'HISTORICAL' },
@@ -16,19 +22,10 @@ const SEED_TICKERS = [
   { symbol: 'HDFCBANK',   value: 1724.80,  change: -0.31, type: 'SIMULATED' },
 ];
 
-interface TickerItem {
-  symbol: string;
-  value: number;
-  change: number;
-  type: 'SIMULATED' | 'HISTORICAL' | 'LIVE';
-}
-
 export default function TickerStrip() {
-  const { t } = useTranslation();
   const [tickers, setTickers] = useState<TickerItem[]>(SEED_TICKERS);
   const [now, setNow] = useState(new Date());
   const [paused, setPaused] = useState(false);
-  const trackRef = useRef<HTMLDivElement>(null);
 
   // Update clock every minute
   useEffect(() => {
@@ -36,12 +33,19 @@ export default function TickerStrip() {
     return () => clearInterval(id);
   }, []);
 
-  // Attempt to fetch live ticker from backend; silently fall back to seed
+  // Keep seed data available if the backend ticker request fails.
   useEffect(() => {
     fetch('/api/market/ticker')
-      .then((r) => r.ok ? r.json() : null)
-      .then((data) => { if (data?.tickers) setTickers(data.tickers); })
-      .catch(() => {}); // silent fallback to seed data
+      .then((response) => {
+        if (!response.ok) throw new Error(`Ticker request failed: ${response.status}`);
+        return response.json();
+      })
+      .then((data: { tickers?: TickerItem[] }) => {
+        if (data.tickers) setTickers(data.tickers);
+      })
+      .catch((error: unknown) => {
+        console.error('Failed to load market ticker; continuing with seed data.', error);
+      });
   }, []);
 
   return (
@@ -66,7 +70,6 @@ export default function TickerStrip() {
         onMouseLeave={() => setPaused(false)}
       >
         <div
-          ref={trackRef}
           className={styles.track}
           style={{ animationPlayState: paused ? 'paused' : 'running' }}
         >

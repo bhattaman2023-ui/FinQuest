@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { useParams, Link, useNavigate } from 'react-router-dom';
+import { useParams, Link } from 'react-router-dom';
 import { CheckCircle, ChevronLeft, ChevronRight, Clock } from 'lucide-react';
 import api from '@/api/client';
 import { PageSpinner } from '@/components/ui/PageSpinner';
@@ -42,7 +42,6 @@ function renderMd(md: string): string {
 
 export default function LessonPage() {
   const { courseSlug, lessonSlug } = useParams<{ courseSlug: string; lessonSlug: string }>();
-  const navigate = useNavigate();
   const qc = useQueryClient();
 
   const { data: lesson, isLoading, isError, refetch } = useQuery<Lesson>({
