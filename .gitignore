@@ -43,6 +43,7 @@ desktop.ini
 
 # ── Testing ───────────────────────────────────────────────────────────────────
 coverage/
+.pytest_cache/
 
 # ── ML / Python ───────────────────────────────────────────────────────────────
 __pycache__/
@@ -53,6 +54,7 @@ __pycache__/
 ml/models/*.pkl
 ml/models/*.joblib
 ml/data/*.csv
+ml/data/yfinance_cache/
 venv/
 .venv/
 *.egg-info/

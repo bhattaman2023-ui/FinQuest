@@ -126,6 +126,8 @@ CREATE TABLE IF NOT EXISTS historical_prices (
   close       NUMERIC(14,2) NOT NULL,
   volume      BIGINT NOT NULL DEFAULT 0,
   data_source TEXT NOT NULL DEFAULT 'SYNTHETIC_SAMPLE',
+  price_adjustment TEXT NOT NULL DEFAULT 'not_applicable',
+  ingested_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   created_at  TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   UNIQUE(symbol, trade_date),
   CHECK (high >= low),
@@ -135,6 +137,10 @@ CREATE TABLE IF NOT EXISTS historical_prices (
   CHECK (low  <= close),
   CHECK (volume >= 0)
 );
+-- Safe for existing databases created before Yahoo price provenance was added.
+ALTER TABLE historical_prices
+  ADD COLUMN IF NOT EXISTS price_adjustment TEXT NOT NULL DEFAULT 'not_applicable',
+  ADD COLUMN IF NOT EXISTS ingested_at TIMESTAMPTZ NOT NULL DEFAULT NOW();
 CREATE INDEX IF NOT EXISTS idx_hist_prices_symbol_date ON historical_prices(symbol, trade_date DESC);
 
 CREATE TABLE IF NOT EXISTS market_events (

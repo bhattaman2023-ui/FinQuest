@@ -215,10 +215,11 @@ function MLTab() {
   });
 
   const predictionColor = data?.prediction === 'UP' ? 'var(--color-gain)' : data?.prediction === 'DOWN' ? 'var(--color-loss)' : 'var(--color-muted)';
+  const predictedAt = data?.predicted_at ?? data?.predictedAt;
 
   return (
     <div>
-      <Disclaimer text="This ML model is an educational experiment trained on synthetic data. Its predictions have no real-world validity. This is NOT investment advice. Never make financial decisions based on this output." />
+      <Disclaimer text="This educational classifier is shown only when approved, recent Yahoo Finance data is available. Its predictions are experimental, may be wrong, and are not investment advice." />
 
       <SymbolSelector value={symbol} onChange={setSymbol} />
 
@@ -255,11 +256,20 @@ function MLTab() {
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 'var(--space-6)' }}>
               {/* Prediction card */}
               <div style={{ padding: 'var(--space-6)', background: 'var(--color-surface)', border: '1px solid var(--color-hairline)', borderRadius: 'var(--radius-md)', textAlign: 'center' }}>
-                <div style={{ fontSize: 'var(--text-xs)', color: 'var(--color-muted)', fontWeight: 500, textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 'var(--space-3)' }}>3-day movement prediction</div>
+                <div style={{ fontSize: 'var(--text-xs)', color: 'var(--color-muted)', fontWeight: 500, textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 'var(--space-3)' }}>{data.horizonDays ?? data.horizon_days ?? 5}-day movement classification</div>
                 <div style={{ fontFamily: 'var(--font-serif)', fontSize: 'var(--text-4xl)', fontWeight: 500, color: predictionColor, marginBottom: 'var(--space-2)' }}>
                   {data.prediction === 'UP' ? '↑' : data.prediction === 'DOWN' ? '↓' : '→'} {data.prediction}
                 </div>
-                <div style={{ fontSize: 'var(--text-sm)', color: 'var(--color-muted)' }}>{symbol}</div>
+                <div style={{ fontSize: 'var(--text-sm)', color: 'var(--color-muted)' }}>{data.symbol ?? symbol}</div>
+                <div style={{ marginTop: 'var(--space-2)', fontSize: 'var(--text-xs)', color: 'var(--color-muted)' }}>
+                  Data: {data.dataSource ?? data.data_source ?? 'Unknown'}
+                  {(data.lastDataDate ?? data.last_data_date) && ` · latest session ${(data.lastDataDate ?? data.last_data_date)}`}
+                </div>
+                {predictedAt && (
+                  <div style={{ marginTop: 'var(--space-1)', fontSize: 'var(--text-xs)', color: 'var(--color-muted)' }}>
+                    Predicted at: {new Date(predictedAt).toLocaleString()}
+                  </div>
+                )}
                 {data.source === 'cached' && (
                   <div style={{ marginTop: 'var(--space-3)', fontSize: 'var(--text-xs)', color: 'var(--color-muted)', background: 'var(--color-bg)', padding: 'var(--space-2)', borderRadius: 'var(--radius-md)' }}>
                     Cached prediction · ML service was offline when this was generated
@@ -269,11 +279,11 @@ function MLTab() {
 
               {/* Confidence bars */}
               <div style={{ padding: 'var(--space-6)', background: 'var(--color-surface)', border: '1px solid var(--color-hairline)', borderRadius: 'var(--radius-md)' }}>
-                <div style={{ fontSize: 'var(--text-sm)', fontWeight: 600, marginBottom: 'var(--space-4)' }}>Confidence</div>
+                <div style={{ fontSize: 'var(--text-sm)', fontWeight: 600, marginBottom: 'var(--space-4)' }}>Class probabilities</div>
                 {[
-                  { label: 'UP ↑', value: data.confidenceUp ?? data.confidence_up, color: 'var(--color-gain)' },
-                  { label: 'DOWN ↓', value: data.confidenceDown ?? data.confidence_down, color: 'var(--color-loss)' },
-                  { label: 'SIDEWAYS →', value: data.confidenceSideways ?? data.confidence_sideways, color: 'var(--color-muted)' },
+                  { label: 'UP ↑', value: data.confidenceUp ?? data.confidence_up ?? data.probabilities?.UP, color: 'var(--color-gain)' },
+                  { label: 'DOWN ↓', value: data.confidenceDown ?? data.confidence_down ?? data.probabilities?.DOWN, color: 'var(--color-loss)' },
+                  { label: 'SIDEWAYS →', value: data.confidenceSideways ?? data.confidence_sideways ?? data.probabilities?.SIDEWAYS, color: 'var(--color-muted)' },
                 ].map(c => (
                   <div key={c.label} style={{ marginBottom: 'var(--space-3)' }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 'var(--text-xs)', marginBottom: 'var(--space-1)' }}>
@@ -290,7 +300,7 @@ function MLTab() {
           )}
 
           <div style={{ marginTop: 'var(--space-6)', padding: 'var(--space-4)', background: 'rgba(183,121,31,0.06)', border: '1px solid rgba(183,121,31,0.2)', borderRadius: 'var(--radius-md)', fontSize: 'var(--text-xs)', color: 'var(--color-muted)' }}>
-            <strong style={{ color: 'var(--color-ink)' }}>About this model:</strong> A simple Random Forest classifier trained on synthetic OHLCV features (momentum, RSI, MA crossovers). Trained on SIMULATED data — accuracy on real markets is unknown and likely poor. This is a teaching demonstration of ML workflows, not a trading tool.
+            <strong style={{ color: 'var(--color-ink)' }}>About this model:</strong> A Random Forest classifies possible five-session movement from historical OHLCV features. It is an educational experiment, not a trading tool; model accuracy on future data is not guaranteed.
           </div>
         </>
       )}
@@ -487,7 +497,7 @@ export default function InsightsPage() {
 
       {/* Footer note */}
       <div style={{ marginTop: 'var(--space-8)', padding: 'var(--space-3) var(--space-4)', background: 'var(--color-sage)', border: '1px solid var(--color-hairline)', borderRadius: 'var(--radius-sm)', fontSize: 'var(--text-xs)', color: 'var(--color-muted)' }}>
-        ⓘ FINQUEST Insights use synthetic/simulated data only. Indicators and ML outputs are demonstrations for financial education. SEBI reminds investors: past performance is not a guarantee of future results. This platform is not registered as an investment advisor.
+        ⓘ The market simulator uses simulated prices. ML output is available only from approved, recent Yahoo Finance history and is for financial education. Past performance does not guarantee future results. This platform is not registered as an investment advisor.
       </div>
     </div>
   );

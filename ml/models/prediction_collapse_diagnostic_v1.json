@@ -1,0 +1,3712 @@
+{
+  "diagnostic_type": "prediction_collapse_calibration_comparison",
+  "generated_at": "2026-11-27T18:16:00.022144+00:00",
+  "data_source": "YFINANCE_NS",
+  "raw_download_rows": 11840,
+  "train_rows": 9080,
+  "test_rows": 2288,
+  "train_dates": {
+    "start": "2019-03-13",
+    "end": "2023-10-13"
+  },
+  "test_dates": {
+    "start": "2023-10-23",
+    "end": "2024-12-20"
+  },
+  "class_order": [
+    "DOWN",
+    "SIDEWAYS",
+    "UP"
+  ],
+  "train_class_counts": {
+    "DOWN": 2078,
+    "SIDEWAYS": 4252,
+    "UP": 2750
+  },
+  "test_class_counts": {
+    "DOWN": 430,
+    "SIDEWAYS": 1211,
+    "UP": 647
+  },
+  "feature_list": [
+    "daily_return",
+    "rsi",
+    "macd",
+    "macd_signal",
+    "macd_hist",
+    "volatility",
+    "volume_change",
+    "ma_5_ratio",
+    "ma_10_ratio",
+    "ma_20_ratio",
+    "ma_50_ratio"
+  ],
+  "label_config": {
+    "horizon_days": 5,
+    "up_threshold": 0.02,
+    "down_threshold": -0.02
+  },
+  "split_config": {
+    "method": "chronological",
+    "test_ratio": 0.2
+  },
+  "model_config": {
+    "type": "RandomForestClassifier",
+    "n_estimators": 300,
+    "max_depth": 8,
+    "min_samples_leaf": 20,
+    "class_weight": "balanced",
+    "random_state": 42,
+    "n_jobs": -1
+  },
+  "calibration_config": {
+    "enabled": true,
+    "method": "sigmoid"
+  },
+  "calibration_cv": {
+    "n_splits": 5,
+    "gap_rows": 40,
+    "method": "sigmoid"
+  },
+  "evaluation_notes": [
+    "The standalone uncalibrated forest and calibrated forest use the same current train and test matrices.",
+    "The pre-calibration fold-ensemble scores use the exact fitted base estimators inside the corresponding calibrated model, scored before their sigmoid mapping.",
+    "The saved production model is additionally evaluated on this test matrix; raw historical rows were not persisted, so Yahoo Finance was downloaded again.",
+    "Diagnostic models are fit in memory only. This report does not replace production model artifacts."
+  ],
+  "models": {
+    "majority_class_baseline": {
+      "rows": 2288,
+      "accuracy": 0.5292832167832168,
+      "macro_f1": 0.23073259026388493,
+      "balanced_accuracy": 0.3333333333333333,
+      "log_loss": 16.96635257870593,
+      "true_class_counts": {
+        "DOWN": 430,
+        "SIDEWAYS": 1211,
+        "UP": 647
+      },
+      "predicted_class_counts": {
+        "DOWN": 0,
+        "SIDEWAYS": 2288,
+        "UP": 0
+      },
+      "confusion_matrix": {
+        "labels_in_row_and_column_order": [
+          "DOWN",
+          "SIDEWAYS",
+          "UP"
+        ],
+        "rows_actual_columns_predicted": [
+          [
+            0,
+            430,
+            0
+          ],
+          [
+            0,
+            1211,
+            0
+          ],
+          [
+            0,
+            647,
+            0
+          ]
+        ]
+      },
+      "per_class": {
+        "DOWN": {
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1": 0.0,
+          "support": 430
+        },
+        "SIDEWAYS": {
+          "precision": 0.5292832167832168,
+          "recall": 1.0,
+          "f1": 0.6921977707916548,
+          "support": 1211
+        },
+        "UP": {
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1": 0.0,
+          "support": 647
+        }
+      },
+      "probability_distributions": {
+        "overall_by_predicted_class": {
+          "DOWN": {
+            "mean": 0.0,
+            "std": 0.0,
+            "min": 0.0,
+            "p05": 0.0,
+            "p25": 0.0,
+            "median": 0.0,
+            "p75": 0.0,
+            "p95": 0.0,
+            "max": 0.0
+          },
+          "SIDEWAYS": {
+            "mean": 1.0,
+            "std": 0.0,
+            "min": 1.0,
+            "p05": 1.0,
+            "p25": 1.0,
+            "median": 1.0,
+            "p75": 1.0,
+            "p95": 1.0,
+            "max": 1.0
+          },
+          "UP": {
+            "mean": 0.0,
+            "std": 0.0,
+            "min": 0.0,
+            "p05": 0.0,
+            "p25": 0.0,
+            "median": 0.0,
+            "p75": 0.0,
+            "p95": 0.0,
+            "max": 0.0
+          }
+        },
+        "mean_probability_by_actual_class": {
+          "DOWN": {
+            "DOWN": 0.0,
+            "SIDEWAYS": 1.0,
+            "UP": 0.0
+          },
+          "SIDEWAYS": {
+            "DOWN": 0.0,
+            "SIDEWAYS": 1.0,
+            "UP": 0.0
+          },
+          "UP": {
+            "DOWN": 0.0,
+            "SIDEWAYS": 1.0,
+            "UP": 0.0
+          }
+        }
+      },
+      "per_stock": {
+        "HDFCBANK": {
+          "rows": 286,
+          "accuracy": 0.5769230769230769,
+          "macro_f1": 0.24390243902439024,
+          "balanced_accuracy": 0.3333333333333333,
+          "log_loss": 15.249237972318795,
+          "true_class_counts": {
+            "DOWN": 48,
+            "SIDEWAYS": 165,
+            "UP": 73
+          },
+          "predicted_class_counts": {
+            "DOWN": 0,
+            "SIDEWAYS": 286,
+            "UP": 0
+          },
+          "confusion_matrix": {
+            "labels_in_row_and_column_order": [
+              "DOWN",
+              "SIDEWAYS",
+              "UP"
+            ],
+            "rows_actual_columns_predicted": [
+              [
+                0,
+                48,
+                0
+              ],
+              [
+                0,
+                165,
+                0
+              ],
+              [
+                0,
+                73,
+                0
+              ]
+            ]
+          },
+          "per_class": {
+            "DOWN": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "support": 48
+            },
+            "SIDEWAYS": {
+              "precision": 0.5769230769230769,
+              "recall": 1.0,
+              "f1": 0.7317073170731707,
+              "support": 165
+            },
+            "UP": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "support": 73
+            }
+          }
+        },
+        "ICICIBANK": {
+          "rows": 286,
+          "accuracy": 0.5769230769230769,
+          "macro_f1": 0.24390243902439024,
+          "balanced_accuracy": 0.3333333333333333,
+          "log_loss": 15.249237972318795,
+          "true_class_counts": {
+            "DOWN": 37,
+            "SIDEWAYS": 165,
+            "UP": 84
+          },
+          "predicted_class_counts": {
+            "DOWN": 0,
+            "SIDEWAYS": 286,
+            "UP": 0
+          },
+          "confusion_matrix": {
+            "labels_in_row_and_column_order": [
+              "DOWN",
+              "SIDEWAYS",
+              "UP"
+            ],
+            "rows_actual_columns_predicted": [
+              [
+                0,
+                37,
+                0
+              ],
+              [
+                0,
+                165,
+                0
+              ],
+              [
+                0,
+                84,
+                0
+              ]
+            ]
+          },
+          "per_class": {
+            "DOWN": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "support": 37
+            },
+            "SIDEWAYS": {
+              "precision": 0.5769230769230769,
+              "recall": 1.0,
+              "f1": 0.7317073170731707,
+              "support": 165
+            },
+            "UP": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "support": 84
+            }
+          }
+        },
+        "INFY": {
+          "rows": 286,
+          "accuracy": 0.493006993006993,
+          "macro_f1": 0.22014051522248243,
+          "balanced_accuracy": 0.3333333333333333,
+          "log_loss": 18.27388021476219,
+          "true_class_counts": {
+            "DOWN": 53,
+            "SIDEWAYS": 141,
+            "UP": 92
+          },
+          "predicted_class_counts": {
+            "DOWN": 0,
+            "SIDEWAYS": 286,
+            "UP": 0
+          },
+          "confusion_matrix": {
+            "labels_in_row_and_column_order": [
+              "DOWN",
+              "SIDEWAYS",
+              "UP"
+            ],
+            "rows_actual_columns_predicted": [
+              [
+                0,
+                53,
+                0
+              ],
+              [
+                0,
+                141,
+                0
+              ],
+              [
+                0,
+                92,
+                0
+              ]
+            ]
+          },
+          "per_class": {
+            "DOWN": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "support": 53
+            },
+            "SIDEWAYS": {
+              "precision": 0.493006993006993,
+              "recall": 1.0,
+              "f1": 0.6604215456674473,
+              "support": 141
+            },
+            "UP": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "support": 92
+            }
+          }
+        },
+        "ITC": {
+          "rows": 286,
+          "accuracy": 0.6153846153846154,
+          "macro_f1": 0.25396825396825395,
+          "balanced_accuracy": 0.3333333333333333,
+          "log_loss": 13.862943611198906,
+          "true_class_counts": {
+            "DOWN": 49,
+            "SIDEWAYS": 176,
+            "UP": 61
+          },
+          "predicted_class_counts": {
+            "DOWN": 0,
+            "SIDEWAYS": 286,
+            "UP": 0
+          },
+          "confusion_matrix": {
+            "labels_in_row_and_column_order": [
+              "DOWN",
+              "SIDEWAYS",
+              "UP"
+            ],
+            "rows_actual_columns_predicted": [
+              [
+                0,
+                49,
+                0
+              ],
+              [
+                0,
+                176,
+                0
+              ],
+              [
+                0,
+                61,
+                0
+              ]
+            ]
+          },
+          "per_class": {
+            "DOWN": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "support": 49
+            },
+            "SIDEWAYS": {
+              "precision": 0.6153846153846154,
+              "recall": 1.0,
+              "f1": 0.7619047619047619,
+              "support": 176
+            },
+            "UP": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "support": 61
+            }
+          }
+        },
+        "LT": {
+          "rows": 286,
+          "accuracy": 0.4125874125874126,
+          "macro_f1": 0.19471947194719472,
+          "balanced_accuracy": 0.3333333333333333,
+          "log_loss": 21.17249569710378,
+          "true_class_counts": {
+            "DOWN": 71,
+            "SIDEWAYS": 118,
+            "UP": 97
+          },
+          "predicted_class_counts": {
+            "DOWN": 0,
+            "SIDEWAYS": 286,
+            "UP": 0
+          },
+          "confusion_matrix": {
+            "labels_in_row_and_column_order": [
+              "DOWN",
+              "SIDEWAYS",
+              "UP"
+            ],
+            "rows_actual_columns_predicted": [
+              [
+                0,
+                71,
+                0
+              ],
+              [
+                0,
+                118,
+                0
+              ],
+              [
+                0,
+                97,
+                0
+              ]
+            ]
+          },
+          "per_class": {
+            "DOWN": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "support": 71
+            },
+            "SIDEWAYS": {
+              "precision": 0.4125874125874126,
+              "recall": 1.0,
+              "f1": 0.5841584158415841,
+              "support": 118
+            },
+            "UP": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "support": 97
+            }
+          }
+        },
+        "RELIANCE": {
+          "rows": 286,
+          "accuracy": 0.5664335664335665,
+          "macro_f1": 0.24107142857142858,
+          "balanced_accuracy": 0.3333333333333333,
+          "log_loss": 15.62731825262422,
+          "true_class_counts": {
+            "DOWN": 58,
+            "SIDEWAYS": 162,
+            "UP": 66
+          },
+          "predicted_class_counts": {
+            "DOWN": 0,
+            "SIDEWAYS": 286,
+            "UP": 0
+          },
+          "confusion_matrix": {
+            "labels_in_row_and_column_order": [
+              "DOWN",
+              "SIDEWAYS",
+              "UP"
+            ],
+            "rows_actual_columns_predicted": [
+              [
+                0,
+                58,
+                0
+              ],
+              [
+                0,
+                162,
+                0
+              ],
+              [
+                0,
+                66,
+                0
+              ]
+            ]
+          },
+          "per_class": {
+            "DOWN": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "support": 58
+            },
+            "SIDEWAYS": {
+              "precision": 0.5664335664335665,
+              "recall": 1.0,
+              "f1": 0.7232142857142857,
+              "support": 162
+            },
+            "UP": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "support": 66
+            }
+          }
+        },
+        "SBIN": {
+          "rows": 286,
+          "accuracy": 0.46853146853146854,
+          "macro_f1": 0.2126984126984127,
+          "balanced_accuracy": 0.3333333333333333,
+          "log_loss": 19.156067535474854,
+          "true_class_counts": {
+            "DOWN": 58,
+            "SIDEWAYS": 134,
+            "UP": 94
+          },
+          "predicted_class_counts": {
+            "DOWN": 0,
+            "SIDEWAYS": 286,
+            "UP": 0
+          },
+          "confusion_matrix": {
+            "labels_in_row_and_column_order": [
+              "DOWN",
+              "SIDEWAYS",
+              "UP"
+            ],
+            "rows_actual_columns_predicted": [
+              [
+                0,
+                58,
+                0
+              ],
+              [
+                0,
+                134,
+                0
+              ],
+              [
+                0,
+                94,
+                0
+              ]
+            ]
+          },
+          "per_class": {
+            "DOWN": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "support": 58
+            },
+            "SIDEWAYS": {
+              "precision": 0.46853146853146854,
+              "recall": 1.0,
+              "f1": 0.638095238095238,
+              "support": 134
+            },
+            "UP": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "support": 94
+            }
+          }
+        },
+        "TCS": {
+          "rows": 286,
+          "accuracy": 0.5244755244755245,
+          "macro_f1": 0.2293577981651376,
+          "balanced_accuracy": 0.3333333333333333,
+          "log_loss": 17.13963937384592,
+          "true_class_counts": {
+            "DOWN": 56,
+            "SIDEWAYS": 150,
+            "UP": 80
+          },
+          "predicted_class_counts": {
+            "DOWN": 0,
+            "SIDEWAYS": 286,
+            "UP": 0
+          },
+          "confusion_matrix": {
+            "labels_in_row_and_column_order": [
+              "DOWN",
+              "SIDEWAYS",
+              "UP"
+            ],
+            "rows_actual_columns_predicted": [
+              [
+                0,
+                56,
+                0
+              ],
+              [
+                0,
+                150,
+                0
+              ],
+              [
+                0,
+                80,
+                0
+              ]
+            ]
+          },
+          "per_class": {
+            "DOWN": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "support": 56
+            },
+            "SIDEWAYS": {
+              "precision": 0.5244755244755245,
+              "recall": 1.0,
+              "f1": 0.6880733944954128,
+              "support": 150
+            },
+            "UP": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "support": 80
+            }
+          }
+        }
+      }
+    },
+    "uncalibrated_random_forest": {
+      "rows": 2288,
+      "accuracy": 0.42395104895104896,
+      "macro_f1": 0.33030790344205513,
+      "balanced_accuracy": 0.3334848237908948,
+      "log_loss": 1.082045371414808,
+      "true_class_counts": {
+        "DOWN": 430,
+        "SIDEWAYS": 1211,
+        "UP": 647
+      },
+      "predicted_class_counts": {
+        "DOWN": 349,
+        "SIDEWAYS": 1432,
+        "UP": 507
+      },
+      "confusion_matrix": {
+        "labels_in_row_and_column_order": [
+          "DOWN",
+          "SIDEWAYS",
+          "UP"
+        ],
+        "rows_actual_columns_predicted": [
+          [
+            61,
+            286,
+            83
+          ],
+          [
+            178,
+            759,
+            274
+          ],
+          [
+            110,
+            387,
+            150
+          ]
+        ]
+      },
+      "per_class": {
+        "DOWN": {
+          "precision": 0.17478510028653296,
+          "recall": 0.14186046511627906,
+          "f1": 0.15661103979460847,
+          "support": 430
+        },
+        "SIDEWAYS": {
+          "precision": 0.5300279329608939,
+          "recall": 0.6267547481420314,
+          "f1": 0.5743473325766175,
+          "support": 1211
+        },
+        "UP": {
+          "precision": 0.2958579881656805,
+          "recall": 0.23183925811437403,
+          "f1": 0.25996533795493937,
+          "support": 647
+        }
+      },
+      "probability_distributions": {
+        "overall_by_predicted_class": {
+          "DOWN": {
+            "mean": 0.3145179173087809,
+            "std": 0.047219642218464516,
+            "min": 0.17160526994504097,
+            "p05": 0.23931859198282165,
+            "p25": 0.2879972289962413,
+            "median": 0.30979041494406523,
+            "p75": 0.33739467060346845,
+            "p95": 0.4010759301658242,
+            "max": 0.5827151979583727
+          },
+          "SIDEWAYS": {
+            "mean": 0.3630983789550966,
+            "std": 0.047141569809408986,
+            "min": 0.12913396735652946,
+            "p05": 0.2806499498656111,
+            "p25": 0.3364418744648856,
+            "median": 0.3670702792232159,
+            "p75": 0.39290189703292233,
+            "p95": 0.43496272773728645,
+            "max": 0.5124969453114371
+          },
+          "UP": {
+            "mean": 0.322383703736127,
+            "std": 0.04510114796819352,
+            "min": 0.20234279580553297,
+            "p05": 0.2577288516974331,
+            "p25": 0.2901729842581333,
+            "median": 0.31922555962872157,
+            "p75": 0.3498817848621515,
+            "p95": 0.400062124389968,
+            "max": 0.5459320618122495
+          }
+        },
+        "mean_probability_by_actual_class": {
+          "DOWN": {
+            "DOWN": 0.3140066388852959,
+            "SIDEWAYS": 0.3676758447289271,
+            "UP": 0.31831751638578126
+          },
+          "SIDEWAYS": {
+            "DOWN": 0.3137597108770431,
+            "SIDEWAYS": 0.36331878934666173,
+            "UP": 0.32292149977629986
+          },
+          "UP": {
+            "DOWN": 0.3162768627661739,
+            "SIDEWAYS": 0.3596436227465458,
+            "UP": 0.324079514487285
+          }
+        }
+      },
+      "per_stock": {
+        "HDFCBANK": {
+          "rows": 286,
+          "accuracy": 0.4965034965034965,
+          "macro_f1": 0.35349889894788356,
+          "balanced_accuracy": 0.360199598726996,
+          "log_loss": 1.067600090481591,
+          "true_class_counts": {
+            "DOWN": 48,
+            "SIDEWAYS": 165,
+            "UP": 73
+          },
+          "predicted_class_counts": {
+            "DOWN": 24,
+            "SIDEWAYS": 201,
+            "UP": 61
+          },
+          "confusion_matrix": {
+            "labels_in_row_and_column_order": [
+              "DOWN",
+              "SIDEWAYS",
+              "UP"
+            ],
+            "rows_actual_columns_predicted": [
+              [
+                3,
+                39,
+                6
+              ],
+              [
+                17,
+                116,
+                32
+              ],
+              [
+                4,
+                46,
+                23
+              ]
+            ]
+          },
+          "per_class": {
+            "DOWN": {
+              "precision": 0.125,
+              "recall": 0.0625,
+              "f1": 0.08333333333333333,
+              "support": 48
+            },
+            "SIDEWAYS": {
+              "precision": 0.5771144278606966,
+              "recall": 0.703030303030303,
+              "f1": 0.6338797814207651,
+              "support": 165
+            },
+            "UP": {
+              "precision": 0.3770491803278688,
+              "recall": 0.3150684931506849,
+              "f1": 0.34328358208955223,
+              "support": 73
+            }
+          }
+        },
+        "ICICIBANK": {
+          "rows": 286,
+          "accuracy": 0.486013986013986,
+          "macro_f1": 0.33085404902635457,
+          "balanced_accuracy": 0.337984087984088,
+          "log_loss": 1.0442229239769338,
+          "true_class_counts": {
+            "DOWN": 37,
+            "SIDEWAYS": 165,
+            "UP": 84
+          },
+          "predicted_class_counts": {
+            "DOWN": 24,
+            "SIDEWAYS": 205,
+            "UP": 57
+          },
+          "confusion_matrix": {
+            "labels_in_row_and_column_order": [
+              "DOWN",
+              "SIDEWAYS",
+              "UP"
+            ],
+            "rows_actual_columns_predicted": [
+              [
+                4,
+                21,
+                12
+              ],
+              [
+                15,
+                120,
+                30
+              ],
+              [
+                5,
+                64,
+                15
+              ]
+            ]
+          },
+          "per_class": {
+            "DOWN": {
+              "precision": 0.16666666666666666,
+              "recall": 0.10810810810810811,
+              "f1": 0.13114754098360656,
+              "support": 37
+            },
+            "SIDEWAYS": {
+              "precision": 0.5853658536585366,
+              "recall": 0.7272727272727273,
+              "f1": 0.6486486486486487,
+              "support": 165
+            },
+            "UP": {
+              "precision": 0.2631578947368421,
+              "recall": 0.17857142857142858,
+              "f1": 0.2127659574468085,
+              "support": 84
+            }
+          }
+        },
+        "INFY": {
+          "rows": 286,
+          "accuracy": 0.36363636363636365,
+          "macro_f1": 0.31181528068278164,
+          "balanced_accuracy": 0.3111132443947971,
+          "log_loss": 1.1084298361286695,
+          "true_class_counts": {
+            "DOWN": 53,
+            "SIDEWAYS": 141,
+            "UP": 92
+          },
+          "predicted_class_counts": {
+            "DOWN": 50,
+            "SIDEWAYS": 155,
+            "UP": 81
+          },
+          "confusion_matrix": {
+            "labels_in_row_and_column_order": [
+              "DOWN",
+              "SIDEWAYS",
+              "UP"
+            ],
+            "rows_actual_columns_predicted": [
+              [
+                7,
+                38,
+                8
+              ],
+              [
+                31,
+                67,
+                43
+              ],
+              [
+                12,
+                50,
+                30
+              ]
+            ]
+          },
+          "per_class": {
+            "DOWN": {
+              "precision": 0.14,
+              "recall": 0.1320754716981132,
+              "f1": 0.13592233009708737,
+              "support": 53
+            },
+            "SIDEWAYS": {
+              "precision": 0.432258064516129,
+              "recall": 0.475177304964539,
+              "f1": 0.4527027027027027,
+              "support": 141
+            },
+            "UP": {
+              "precision": 0.37037037037037035,
+              "recall": 0.32608695652173914,
+              "f1": 0.3468208092485549,
+              "support": 92
+            }
+          }
+        },
+        "ITC": {
+          "rows": 286,
+          "accuracy": 0.493006993006993,
+          "macro_f1": 0.33453953453953456,
+          "balanced_accuracy": 0.3357741009965835,
+          "log_loss": 1.054660700280255,
+          "true_class_counts": {
+            "DOWN": 49,
+            "SIDEWAYS": 176,
+            "UP": 61
+          },
+          "predicted_class_counts": {
+            "DOWN": 21,
+            "SIDEWAYS": 209,
+            "UP": 56
+          },
+          "confusion_matrix": {
+            "labels_in_row_and_column_order": [
+              "DOWN",
+              "SIDEWAYS",
+              "UP"
+            ],
+            "rows_actual_columns_predicted": [
+              [
+                6,
+                38,
+                5
+              ],
+              [
+                12,
+                124,
+                40
+              ],
+              [
+                3,
+                47,
+                11
+              ]
+            ]
+          },
+          "per_class": {
+            "DOWN": {
+              "precision": 0.2857142857142857,
+              "recall": 0.12244897959183673,
+              "f1": 0.17142857142857143,
+              "support": 49
+            },
+            "SIDEWAYS": {
+              "precision": 0.5933014354066986,
+              "recall": 0.7045454545454546,
+              "f1": 0.6441558441558441,
+              "support": 176
+            },
+            "UP": {
+              "precision": 0.19642857142857142,
+              "recall": 0.18032786885245902,
+              "f1": 0.18803418803418803,
+              "support": 61
+            }
+          }
+        },
+        "LT": {
+          "rows": 286,
+          "accuracy": 0.3811188811188811,
+          "macro_f1": 0.34519740580741626,
+          "balanced_accuracy": 0.35692892282930505,
+          "log_loss": 1.0920395135382732,
+          "true_class_counts": {
+            "DOWN": 71,
+            "SIDEWAYS": 118,
+            "UP": 97
+          },
+          "predicted_class_counts": {
+            "DOWN": 76,
+            "SIDEWAYS": 170,
+            "UP": 40
+          },
+          "confusion_matrix": {
+            "labels_in_row_and_column_order": [
+              "DOWN",
+              "SIDEWAYS",
+              "UP"
+            ],
+            "rows_actual_columns_predicted": [
+              [
+                20,
+                44,
+                7
+              ],
+              [
+                34,
+                70,
+                14
+              ],
+              [
+                22,
+                56,
+                19
+              ]
+            ]
+          },
+          "per_class": {
+            "DOWN": {
+              "precision": 0.2631578947368421,
+              "recall": 0.28169014084507044,
+              "f1": 0.272108843537415,
+              "support": 71
+            },
+            "SIDEWAYS": {
+              "precision": 0.4117647058823529,
+              "recall": 0.5932203389830508,
+              "f1": 0.4861111111111111,
+              "support": 118
+            },
+            "UP": {
+              "precision": 0.475,
+              "recall": 0.1958762886597938,
+              "f1": 0.2773722627737226,
+              "support": 97
+            }
+          }
+        },
+        "RELIANCE": {
+          "rows": 286,
+          "accuracy": 0.4160839160839161,
+          "macro_f1": 0.3117820463510869,
+          "balanced_accuracy": 0.3148793167950256,
+          "log_loss": 1.0982927716426274,
+          "true_class_counts": {
+            "DOWN": 58,
+            "SIDEWAYS": 162,
+            "UP": 66
+          },
+          "predicted_class_counts": {
+            "DOWN": 39,
+            "SIDEWAYS": 160,
+            "UP": 87
+          },
+          "confusion_matrix": {
+            "labels_in_row_and_column_order": [
+              "DOWN",
+              "SIDEWAYS",
+              "UP"
+            ],
+            "rows_actual_columns_predicted": [
+              [
+                6,
+                26,
+                26
+              ],
+              [
+                20,
+                97,
+                45
+              ],
+              [
+                13,
+                37,
+                16
+              ]
+            ]
+          },
+          "per_class": {
+            "DOWN": {
+              "precision": 0.15384615384615385,
+              "recall": 0.10344827586206896,
+              "f1": 0.12371134020618557,
+              "support": 58
+            },
+            "SIDEWAYS": {
+              "precision": 0.60625,
+              "recall": 0.5987654320987654,
+              "f1": 0.6024844720496895,
+              "support": 162
+            },
+            "UP": {
+              "precision": 0.1839080459770115,
+              "recall": 0.24242424242424243,
+              "f1": 0.20915032679738563,
+              "support": 66
+            }
+          }
+        },
+        "SBIN": {
+          "rows": 286,
+          "accuracy": 0.3356643356643357,
+          "macro_f1": 0.2736473429951691,
+          "balanced_accuracy": 0.2793661917850221,
+          "log_loss": 1.1056589724738262,
+          "true_class_counts": {
+            "DOWN": 58,
+            "SIDEWAYS": 134,
+            "UP": 94
+          },
+          "predicted_class_counts": {
+            "DOWN": 42,
+            "SIDEWAYS": 154,
+            "UP": 90
+          },
+          "confusion_matrix": {
+            "labels_in_row_and_column_order": [
+              "DOWN",
+              "SIDEWAYS",
+              "UP"
+            ],
+            "rows_actual_columns_predicted": [
+              [
+                4,
+                40,
+                14
+              ],
+              [
+                18,
+                66,
+                50
+              ],
+              [
+                20,
+                48,
+                26
+              ]
+            ]
+          },
+          "per_class": {
+            "DOWN": {
+              "precision": 0.09523809523809523,
+              "recall": 0.06896551724137931,
+              "f1": 0.08,
+              "support": 58
+            },
+            "SIDEWAYS": {
+              "precision": 0.42857142857142855,
+              "recall": 0.4925373134328358,
+              "f1": 0.4583333333333333,
+              "support": 134
+            },
+            "UP": {
+              "precision": 0.28888888888888886,
+              "recall": 0.2765957446808511,
+              "f1": 0.2826086956521739,
+              "support": 94
+            }
+          }
+        },
+        "TCS": {
+          "rows": 286,
+          "accuracy": 0.4195804195804196,
+          "macro_f1": 0.3160380719075138,
+          "balanced_accuracy": 0.3271428571428571,
+          "log_loss": 1.0854581627962847,
+          "true_class_counts": {
+            "DOWN": 56,
+            "SIDEWAYS": 150,
+            "UP": 80
+          },
+          "predicted_class_counts": {
+            "DOWN": 73,
+            "SIDEWAYS": 178,
+            "UP": 35
+          },
+          "confusion_matrix": {
+            "labels_in_row_and_column_order": [
+              "DOWN",
+              "SIDEWAYS",
+              "UP"
+            ],
+            "rows_actual_columns_predicted": [
+              [
+                11,
+                40,
+                5
+              ],
+              [
+                31,
+                99,
+                20
+              ],
+              [
+                31,
+                39,
+                10
+              ]
+            ]
+          },
+          "per_class": {
+            "DOWN": {
+              "precision": 0.1506849315068493,
+              "recall": 0.19642857142857142,
+              "f1": 0.17054263565891473,
+              "support": 56
+            },
+            "SIDEWAYS": {
+              "precision": 0.5561797752808989,
+              "recall": 0.66,
+              "f1": 0.6036585365853658,
+              "support": 150
+            },
+            "UP": {
+              "precision": 0.2857142857142857,
+              "recall": 0.125,
+              "f1": 0.17391304347826086,
+              "support": 80
+            }
+          }
+        }
+      }
+    },
+    "sigmoid_calibration_fold_ensemble_before_calibration": {
+      "rows": 2288,
+      "accuracy": 0.44973776223776224,
+      "macro_f1": 0.3336306515285565,
+      "balanced_accuracy": 0.3413461898537733,
+      "log_loss": 1.0717106865048405,
+      "true_class_counts": {
+        "DOWN": 430,
+        "SIDEWAYS": 1211,
+        "UP": 647
+      },
+      "predicted_class_counts": {
+        "DOWN": 288,
+        "SIDEWAYS": 1590,
+        "UP": 410
+      },
+      "confusion_matrix": {
+        "labels_in_row_and_column_order": [
+          "DOWN",
+          "SIDEWAYS",
+          "UP"
+        ],
+        "rows_actual_columns_predicted": [
+          [
+            50,
+            309,
+            71
+          ],
+          [
+            169,
+            841,
+            201
+          ],
+          [
+            69,
+            440,
+            138
+          ]
+        ]
+      },
+      "per_class": {
+        "DOWN": {
+          "precision": 0.1736111111111111,
+          "recall": 0.11627906976744186,
+          "f1": 0.1392757660167131,
+          "support": 430
+        },
+        "SIDEWAYS": {
+          "precision": 0.5289308176100629,
+          "recall": 0.694467382328654,
+          "f1": 0.6004998214923242,
+          "support": 1211
+        },
+        "UP": {
+          "precision": 0.33658536585365856,
+          "recall": 0.2132921174652241,
+          "f1": 0.261116367076632,
+          "support": 647
+        }
+      },
+      "probability_distributions": {
+        "overall_by_predicted_class": {
+          "DOWN": {
+            "mean": 0.311356734703919,
+            "std": 0.04486838531280684,
+            "min": 0.2050353781084681,
+            "p05": 0.2518935827158615,
+            "p25": 0.28208965819807996,
+            "median": 0.30574323226165045,
+            "p75": 0.3335078215160936,
+            "p95": 0.3956612736138931,
+            "max": 0.5826874623182021
+          },
+          "SIDEWAYS": {
+            "mean": 0.3828412601813509,
+            "std": 0.05845423396961367,
+            "min": 0.12650005881973767,
+            "p05": 0.28312780358283457,
+            "p25": 0.3450718258553228,
+            "median": 0.38518426541371464,
+            "p75": 0.4260629879372356,
+            "p95": 0.4696818964406055,
+            "max": 0.5296757105086461
+          },
+          "UP": {
+            "mean": 0.3058020051147305,
+            "std": 0.052162279255681475,
+            "min": 0.17628181145225236,
+            "p05": 0.22539401394926595,
+            "p25": 0.26854544554788773,
+            "median": 0.30285691007507787,
+            "p75": 0.3409524714753014,
+            "p95": 0.394451928582051,
+            "max": 0.4866037003380894
+          }
+        },
+        "mean_probability_by_actual_class": {
+          "DOWN": {
+            "DOWN": 0.3104203555001559,
+            "SIDEWAYS": 0.392265889817308,
+            "UP": 0.29731375468253657
+          },
+          "SIDEWAYS": {
+            "DOWN": 0.31235032104273236,
+            "SIDEWAYS": 0.38205707849882947,
+            "UP": 0.3055926004584386
+          },
+          "UP": {
+            "DOWN": 0.31011934676159303,
+            "SIDEWAYS": 0.3780453610686336,
+            "UP": 0.31183529216977374
+          }
+        }
+      },
+      "per_stock": {
+        "HDFCBANK": {
+          "rows": 286,
+          "accuracy": 0.4965034965034965,
+          "macro_f1": 0.35502674622102254,
+          "balanced_accuracy": 0.3571502698215027,
+          "log_loss": 1.0553947118675835,
+          "true_class_counts": {
+            "DOWN": 48,
+            "SIDEWAYS": 165,
+            "UP": 73
+          },
+          "predicted_class_counts": {
+            "DOWN": 31,
+            "SIDEWAYS": 213,
+            "UP": 42
+          },
+          "confusion_matrix": {
+            "labels_in_row_and_column_order": [
+              "DOWN",
+              "SIDEWAYS",
+              "UP"
+            ],
+            "rows_actual_columns_predicted": [
+              [
+                6,
+                40,
+                2
+              ],
+              [
+                21,
+                120,
+                24
+              ],
+              [
+                4,
+                53,
+                16
+              ]
+            ]
+          },
+          "per_class": {
+            "DOWN": {
+              "precision": 0.1935483870967742,
+              "recall": 0.125,
+              "f1": 0.1518987341772152,
+              "support": 48
+            },
+            "SIDEWAYS": {
+              "precision": 0.5633802816901409,
+              "recall": 0.7272727272727273,
+              "f1": 0.6349206349206349,
+              "support": 165
+            },
+            "UP": {
+              "precision": 0.38095238095238093,
+              "recall": 0.2191780821917808,
+              "f1": 0.2782608695652174,
+              "support": 73
+            }
+          }
+        },
+        "ICICIBANK": {
+          "rows": 286,
+          "accuracy": 0.506993006993007,
+          "macro_f1": 0.3079053141875307,
+          "balanced_accuracy": 0.3283354783354783,
+          "log_loss": 1.0298476108730805,
+          "true_class_counts": {
+            "DOWN": 37,
+            "SIDEWAYS": 165,
+            "UP": 84
+          },
+          "predicted_class_counts": {
+            "DOWN": 19,
+            "SIDEWAYS": 223,
+            "UP": 44
+          },
+          "confusion_matrix": {
+            "labels_in_row_and_column_order": [
+              "DOWN",
+              "SIDEWAYS",
+              "UP"
+            ],
+            "rows_actual_columns_predicted": [
+              [
+                2,
+                25,
+                10
+              ],
+              [
+                10,
+                132,
+                23
+              ],
+              [
+                7,
+                66,
+                11
+              ]
+            ]
+          },
+          "per_class": {
+            "DOWN": {
+              "precision": 0.10526315789473684,
+              "recall": 0.05405405405405406,
+              "f1": 0.07142857142857142,
+              "support": 37
+            },
+            "SIDEWAYS": {
+              "precision": 0.5919282511210763,
+              "recall": 0.8,
+              "f1": 0.6804123711340206,
+              "support": 165
+            },
+            "UP": {
+              "precision": 0.25,
+              "recall": 0.13095238095238096,
+              "f1": 0.171875,
+              "support": 84
+            }
+          }
+        },
+        "INFY": {
+          "rows": 286,
+          "accuracy": 0.3881118881118881,
+          "macro_f1": 0.33936244720367403,
+          "balanced_accuracy": 0.3411401819497049,
+          "log_loss": 1.095692903790473,
+          "true_class_counts": {
+            "DOWN": 53,
+            "SIDEWAYS": 141,
+            "UP": 92
+          },
+          "predicted_class_counts": {
+            "DOWN": 54,
+            "SIDEWAYS": 172,
+            "UP": 60
+          },
+          "confusion_matrix": {
+            "labels_in_row_and_column_order": [
+              "DOWN",
+              "SIDEWAYS",
+              "UP"
+            ],
+            "rows_actual_columns_predicted": [
+              [
+                13,
+                35,
+                5
+              ],
+              [
+                32,
+                76,
+                33
+              ],
+              [
+                9,
+                61,
+                22
+              ]
+            ]
+          },
+          "per_class": {
+            "DOWN": {
+              "precision": 0.24074074074074073,
+              "recall": 0.24528301886792453,
+              "f1": 0.24299065420560748,
+              "support": 53
+            },
+            "SIDEWAYS": {
+              "precision": 0.4418604651162791,
+              "recall": 0.5390070921985816,
+              "f1": 0.48562300319488816,
+              "support": 141
+            },
+            "UP": {
+              "precision": 0.36666666666666664,
+              "recall": 0.2391304347826087,
+              "f1": 0.2894736842105263,
+              "support": 92
+            }
+          }
+        },
+        "ITC": {
+          "rows": 286,
+          "accuracy": 0.5559440559440559,
+          "macro_f1": 0.36368751817710504,
+          "balanced_accuracy": 0.37030918924947026,
+          "log_loss": 1.0400930749088555,
+          "true_class_counts": {
+            "DOWN": 49,
+            "SIDEWAYS": 176,
+            "UP": 61
+          },
+          "predicted_class_counts": {
+            "DOWN": 32,
+            "SIDEWAYS": 228,
+            "UP": 26
+          },
+          "confusion_matrix": {
+            "labels_in_row_and_column_order": [
+              "DOWN",
+              "SIDEWAYS",
+              "UP"
+            ],
+            "rows_actual_columns_predicted": [
+              [
+                9,
+                38,
+                2
+              ],
+              [
+                16,
+                143,
+                17
+              ],
+              [
+                7,
+                47,
+                7
+              ]
+            ]
+          },
+          "per_class": {
+            "DOWN": {
+              "precision": 0.28125,
+              "recall": 0.1836734693877551,
+              "f1": 0.2222222222222222,
+              "support": 49
+            },
+            "SIDEWAYS": {
+              "precision": 0.6271929824561403,
+              "recall": 0.8125,
+              "f1": 0.7079207920792079,
+              "support": 176
+            },
+            "UP": {
+              "precision": 0.2692307692307692,
+              "recall": 0.11475409836065574,
+              "f1": 0.16091954022988506,
+              "support": 61
+            }
+          }
+        },
+        "LT": {
+          "rows": 286,
+          "accuracy": 0.3741258741258741,
+          "macro_f1": 0.3117427772600187,
+          "balanced_accuracy": 0.3306741843102414,
+          "log_loss": 1.0927393053967924,
+          "true_class_counts": {
+            "DOWN": 71,
+            "SIDEWAYS": 118,
+            "UP": 97
+          },
+          "predicted_class_counts": {
+            "DOWN": 45,
+            "SIDEWAYS": 190,
+            "UP": 51
+          },
+          "confusion_matrix": {
+            "labels_in_row_and_column_order": [
+              "DOWN",
+              "SIDEWAYS",
+              "UP"
+            ],
+            "rows_actual_columns_predicted": [
+              [
+                8,
+                49,
+                14
+              ],
+              [
+                26,
+                77,
+                15
+              ],
+              [
+                11,
+                64,
+                22
+              ]
+            ]
+          },
+          "per_class": {
+            "DOWN": {
+              "precision": 0.17777777777777778,
+              "recall": 0.11267605633802817,
+              "f1": 0.13793103448275862,
+              "support": 71
+            },
+            "SIDEWAYS": {
+              "precision": 0.4052631578947368,
+              "recall": 0.652542372881356,
+              "f1": 0.5,
+              "support": 118
+            },
+            "UP": {
+              "precision": 0.43137254901960786,
+              "recall": 0.2268041237113402,
+              "f1": 0.2972972972972973,
+              "support": 97
+            }
+          }
+        },
+        "RELIANCE": {
+          "rows": 286,
+          "accuracy": 0.43006993006993005,
+          "macro_f1": 0.30023159084858647,
+          "balanced_accuracy": 0.30744868867474234,
+          "log_loss": 1.08943017532514,
+          "true_class_counts": {
+            "DOWN": 58,
+            "SIDEWAYS": 162,
+            "UP": 66
+          },
+          "predicted_class_counts": {
+            "DOWN": 35,
+            "SIDEWAYS": 184,
+            "UP": 67
+          },
+          "confusion_matrix": {
+            "labels_in_row_and_column_order": [
+              "DOWN",
+              "SIDEWAYS",
+              "UP"
+            ],
+            "rows_actual_columns_predicted": [
+              [
+                5,
+                33,
+                20
+              ],
+              [
+                21,
+                106,
+                35
+              ],
+              [
+                9,
+                45,
+                12
+              ]
+            ]
+          },
+          "per_class": {
+            "DOWN": {
+              "precision": 0.14285714285714285,
+              "recall": 0.08620689655172414,
+              "f1": 0.10752688172043011,
+              "support": 58
+            },
+            "SIDEWAYS": {
+              "precision": 0.5760869565217391,
+              "recall": 0.654320987654321,
+              "f1": 0.6127167630057804,
+              "support": 162
+            },
+            "UP": {
+              "precision": 0.1791044776119403,
+              "recall": 0.18181818181818182,
+              "f1": 0.18045112781954886,
+              "support": 66
+            }
+          }
+        },
+        "SBIN": {
+          "rows": 286,
+          "accuracy": 0.40559440559440557,
+          "macro_f1": 0.31311158596738026,
+          "balanced_accuracy": 0.3257739183758391,
+          "log_loss": 1.0901052076135416,
+          "true_class_counts": {
+            "DOWN": 58,
+            "SIDEWAYS": 134,
+            "UP": 94
+          },
+          "predicted_class_counts": {
+            "DOWN": 37,
+            "SIDEWAYS": 180,
+            "UP": 69
+          },
+          "confusion_matrix": {
+            "labels_in_row_and_column_order": [
+              "DOWN",
+              "SIDEWAYS",
+              "UP"
+            ],
+            "rows_actual_columns_predicted": [
+              [
+                2,
+                47,
+                9
+              ],
+              [
+                18,
+                85,
+                31
+              ],
+              [
+                17,
+                48,
+                29
+              ]
+            ]
+          },
+          "per_class": {
+            "DOWN": {
+              "precision": 0.05405405405405406,
+              "recall": 0.034482758620689655,
+              "f1": 0.042105263157894736,
+              "support": 58
+            },
+            "SIDEWAYS": {
+              "precision": 0.4722222222222222,
+              "recall": 0.6343283582089553,
+              "f1": 0.5414012738853503,
+              "support": 134
+            },
+            "UP": {
+              "precision": 0.42028985507246375,
+              "recall": 0.30851063829787234,
+              "f1": 0.3558282208588957,
+              "support": 94
+            }
+          }
+        },
+        "TCS": {
+          "rows": 286,
+          "accuracy": 0.4405594405594406,
+          "macro_f1": 0.32760786287503846,
+          "balanced_accuracy": 0.3355952380952381,
+          "log_loss": 1.0803825022632576,
+          "true_class_counts": {
+            "DOWN": 56,
+            "SIDEWAYS": 150,
+            "UP": 80
+          },
+          "predicted_class_counts": {
+            "DOWN": 35,
+            "SIDEWAYS": 200,
+            "UP": 51
+          },
+          "confusion_matrix": {
+            "labels_in_row_and_column_order": [
+              "DOWN",
+              "SIDEWAYS",
+              "UP"
+            ],
+            "rows_actual_columns_predicted": [
+              [
+                5,
+                42,
+                9
+              ],
+              [
+                25,
+                102,
+                23
+              ],
+              [
+                5,
+                56,
+                19
+              ]
+            ]
+          },
+          "per_class": {
+            "DOWN": {
+              "precision": 0.14285714285714285,
+              "recall": 0.08928571428571429,
+              "f1": 0.10989010989010989,
+              "support": 56
+            },
+            "SIDEWAYS": {
+              "precision": 0.51,
+              "recall": 0.68,
+              "f1": 0.5828571428571429,
+              "support": 150
+            },
+            "UP": {
+              "precision": 0.37254901960784315,
+              "recall": 0.2375,
+              "f1": 0.2900763358778626,
+              "support": 80
+            }
+          }
+        }
+      }
+    },
+    "sigmoid_calibrated_random_forest_same_split": {
+      "rows": 2288,
+      "accuracy": 0.5297202797202797,
+      "macro_f1": 0.23182735813763067,
+      "balanced_accuracy": 0.33384853168469864,
+      "log_loss": 1.015350492289173,
+      "true_class_counts": {
+        "DOWN": 430,
+        "SIDEWAYS": 1211,
+        "UP": 647
+      },
+      "predicted_class_counts": {
+        "DOWN": 0,
+        "SIDEWAYS": 2287,
+        "UP": 1
+      },
+      "confusion_matrix": {
+        "labels_in_row_and_column_order": [
+          "DOWN",
+          "SIDEWAYS",
+          "UP"
+        ],
+        "rows_actual_columns_predicted": [
+          [
+            0,
+            430,
+            0
+          ],
+          [
+            0,
+            1211,
+            0
+          ],
+          [
+            0,
+            646,
+            1
+          ]
+        ]
+      },
+      "per_class": {
+        "DOWN": {
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1": 0.0,
+          "support": 430
+        },
+        "SIDEWAYS": {
+          "precision": 0.5295146480104941,
+          "recall": 1.0,
+          "f1": 0.6923956546598056,
+          "support": 1211
+        },
+        "UP": {
+          "precision": 1.0,
+          "recall": 0.0015455950540958269,
+          "f1": 0.0030864197530864196,
+          "support": 647
+        }
+      },
+      "probability_distributions": {
+        "overall_by_predicted_class": {
+          "DOWN": {
+            "mean": 0.22449332417646,
+            "std": 0.004931726941581427,
+            "min": 0.21342845259243254,
+            "p05": 0.2167090184044414,
+            "p25": 0.22066074974178318,
+            "median": 0.22454514322484564,
+            "p75": 0.22817135836599411,
+            "p95": 0.23292938812914968,
+            "max": 0.23945870921721935
+          },
+          "SIDEWAYS": {
+            "mean": 0.4729171919862182,
+            "std": 0.025676759391377858,
+            "min": 0.37962576489323824,
+            "p05": 0.4295459405342042,
+            "p25": 0.45596053543908827,
+            "median": 0.47374747919840776,
+            "p75": 0.49320408189775405,
+            "p95": 0.5116114268274523,
+            "max": 0.52900266539198
+          },
+          "UP": {
+            "mean": 0.3025894838373218,
+            "std": 0.021900584228712185,
+            "min": 0.2531092183054146,
+            "p05": 0.26842929917026626,
+            "p25": 0.2862276539336487,
+            "median": 0.3023510150674498,
+            "p75": 0.31680994095592957,
+            "p95": 0.33930428381570804,
+            "max": 0.38992017539183077
+          }
+        },
+        "mean_probability_by_actual_class": {
+          "DOWN": {
+            "DOWN": 0.22382526435312264,
+            "SIDEWAYS": 0.4773159363273333,
+            "UP": 0.29885879931954396
+          },
+          "SIDEWAYS": {
+            "DOWN": 0.2244152445554746,
+            "SIDEWAYS": 0.47281849409069127,
+            "UP": 0.3027662613538341
+          },
+          "UP": {
+            "DOWN": 0.22508346350420103,
+            "SIDEWAYS": 0.47017849505392056,
+            "UP": 0.3047380414418783
+          }
+        }
+      },
+      "per_stock": {
+        "HDFCBANK": {
+          "rows": 286,
+          "accuracy": 0.5769230769230769,
+          "macro_f1": 0.24390243902439024,
+          "balanced_accuracy": 0.3333333333333333,
+          "log_loss": 0.9881247559515391,
+          "true_class_counts": {
+            "DOWN": 48,
+            "SIDEWAYS": 165,
+            "UP": 73
+          },
+          "predicted_class_counts": {
+            "DOWN": 0,
+            "SIDEWAYS": 286,
+            "UP": 0
+          },
+          "confusion_matrix": {
+            "labels_in_row_and_column_order": [
+              "DOWN",
+              "SIDEWAYS",
+              "UP"
+            ],
+            "rows_actual_columns_predicted": [
+              [
+                0,
+                48,
+                0
+              ],
+              [
+                0,
+                165,
+                0
+              ],
+              [
+                0,
+                73,
+                0
+              ]
+            ]
+          },
+          "per_class": {
+            "DOWN": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "support": 48
+            },
+            "SIDEWAYS": {
+              "precision": 0.5769230769230769,
+              "recall": 1.0,
+              "f1": 0.7317073170731707,
+              "support": 165
+            },
+            "UP": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "support": 73
+            }
+          }
+        },
+        "ICICIBANK": {
+          "rows": 286,
+          "accuracy": 0.5769230769230769,
+          "macro_f1": 0.24390243902439024,
+          "balanced_accuracy": 0.3333333333333333,
+          "log_loss": 0.9691910089736576,
+          "true_class_counts": {
+            "DOWN": 37,
+            "SIDEWAYS": 165,
+            "UP": 84
+          },
+          "predicted_class_counts": {
+            "DOWN": 0,
+            "SIDEWAYS": 286,
+            "UP": 0
+          },
+          "confusion_matrix": {
+            "labels_in_row_and_column_order": [
+              "DOWN",
+              "SIDEWAYS",
+              "UP"
+            ],
+            "rows_actual_columns_predicted": [
+              [
+                0,
+                37,
+                0
+              ],
+              [
+                0,
+                165,
+                0
+              ],
+              [
+                0,
+                84,
+                0
+              ]
+            ]
+          },
+          "per_class": {
+            "DOWN": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "support": 37
+            },
+            "SIDEWAYS": {
+              "precision": 0.5769230769230769,
+              "recall": 1.0,
+              "f1": 0.7317073170731707,
+              "support": 165
+            },
+            "UP": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "support": 84
+            }
+          }
+        },
+        "INFY": {
+          "rows": 286,
+          "accuracy": 0.493006993006993,
+          "macro_f1": 0.22014051522248243,
+          "balanced_accuracy": 0.3333333333333333,
+          "log_loss": 1.0376819872945748,
+          "true_class_counts": {
+            "DOWN": 53,
+            "SIDEWAYS": 141,
+            "UP": 92
+          },
+          "predicted_class_counts": {
+            "DOWN": 0,
+            "SIDEWAYS": 286,
+            "UP": 0
+          },
+          "confusion_matrix": {
+            "labels_in_row_and_column_order": [
+              "DOWN",
+              "SIDEWAYS",
+              "UP"
+            ],
+            "rows_actual_columns_predicted": [
+              [
+                0,
+                53,
+                0
+              ],
+              [
+                0,
+                141,
+                0
+              ],
+              [
+                0,
+                92,
+                0
+              ]
+            ]
+          },
+          "per_class": {
+            "DOWN": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "support": 53
+            },
+            "SIDEWAYS": {
+              "precision": 0.493006993006993,
+              "recall": 1.0,
+              "f1": 0.6604215456674473,
+              "support": 141
+            },
+            "UP": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "support": 92
+            }
+          }
+        },
+        "ITC": {
+          "rows": 286,
+          "accuracy": 0.6153846153846154,
+          "macro_f1": 0.25396825396825395,
+          "balanced_accuracy": 0.3333333333333333,
+          "log_loss": 0.9699734108406559,
+          "true_class_counts": {
+            "DOWN": 49,
+            "SIDEWAYS": 176,
+            "UP": 61
+          },
+          "predicted_class_counts": {
+            "DOWN": 0,
+            "SIDEWAYS": 286,
+            "UP": 0
+          },
+          "confusion_matrix": {
+            "labels_in_row_and_column_order": [
+              "DOWN",
+              "SIDEWAYS",
+              "UP"
+            ],
+            "rows_actual_columns_predicted": [
+              [
+                0,
+                49,
+                0
+              ],
+              [
+                0,
+                176,
+                0
+              ],
+              [
+                0,
+                61,
+                0
+              ]
+            ]
+          },
+          "per_class": {
+            "DOWN": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "support": 49
+            },
+            "SIDEWAYS": {
+              "precision": 0.6153846153846154,
+              "recall": 1.0,
+              "f1": 0.7619047619047619,
+              "support": 176
+            },
+            "UP": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "support": 61
+            }
+          }
+        },
+        "LT": {
+          "rows": 286,
+          "accuracy": 0.4160839160839161,
+          "macro_f1": 0.2020053679039854,
+          "balanced_accuracy": 0.3367697594501718,
+          "log_loss": 1.0802538497890042,
+          "true_class_counts": {
+            "DOWN": 71,
+            "SIDEWAYS": 118,
+            "UP": 97
+          },
+          "predicted_class_counts": {
+            "DOWN": 0,
+            "SIDEWAYS": 285,
+            "UP": 1
+          },
+          "confusion_matrix": {
+            "labels_in_row_and_column_order": [
+              "DOWN",
+              "SIDEWAYS",
+              "UP"
+            ],
+            "rows_actual_columns_predicted": [
+              [
+                0,
+                71,
+                0
+              ],
+              [
+                0,
+                118,
+                0
+              ],
+              [
+                0,
+                96,
+                1
+              ]
+            ]
+          },
+          "per_class": {
+            "DOWN": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "support": 71
+            },
+            "SIDEWAYS": {
+              "precision": 0.41403508771929826,
+              "recall": 1.0,
+              "f1": 0.5856079404466501,
+              "support": 118
+            },
+            "UP": {
+              "precision": 1.0,
+              "recall": 0.010309278350515464,
+              "f1": 0.02040816326530612,
+              "support": 97
+            }
+          }
+        },
+        "RELIANCE": {
+          "rows": 286,
+          "accuracy": 0.5664335664335665,
+          "macro_f1": 0.24107142857142858,
+          "balanced_accuracy": 0.3333333333333333,
+          "log_loss": 1.008816991066571,
+          "true_class_counts": {
+            "DOWN": 58,
+            "SIDEWAYS": 162,
+            "UP": 66
+          },
+          "predicted_class_counts": {
+            "DOWN": 0,
+            "SIDEWAYS": 286,
+            "UP": 0
+          },
+          "confusion_matrix": {
+            "labels_in_row_and_column_order": [
+              "DOWN",
+              "SIDEWAYS",
+              "UP"
+            ],
+            "rows_actual_columns_predicted": [
+              [
+                0,
+                58,
+                0
+              ],
+              [
+                0,
+                162,
+                0
+              ],
+              [
+                0,
+                66,
+                0
+              ]
+            ]
+          },
+          "per_class": {
+            "DOWN": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "support": 58
+            },
+            "SIDEWAYS": {
+              "precision": 0.5664335664335665,
+              "recall": 1.0,
+              "f1": 0.7232142857142857,
+              "support": 162
+            },
+            "UP": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "support": 66
+            }
+          }
+        },
+        "SBIN": {
+          "rows": 286,
+          "accuracy": 0.46853146853146854,
+          "macro_f1": 0.2126984126984127,
+          "balanced_accuracy": 0.3333333333333333,
+          "log_loss": 1.0455535102664972,
+          "true_class_counts": {
+            "DOWN": 58,
+            "SIDEWAYS": 134,
+            "UP": 94
+          },
+          "predicted_class_counts": {
+            "DOWN": 0,
+            "SIDEWAYS": 286,
+            "UP": 0
+          },
+          "confusion_matrix": {
+            "labels_in_row_and_column_order": [
+              "DOWN",
+              "SIDEWAYS",
+              "UP"
+            ],
+            "rows_actual_columns_predicted": [
+              [
+                0,
+                58,
+                0
+              ],
+              [
+                0,
+                134,
+                0
+              ],
+              [
+                0,
+                94,
+                0
+              ]
+            ]
+          },
+          "per_class": {
+            "DOWN": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "support": 58
+            },
+            "SIDEWAYS": {
+              "precision": 0.46853146853146854,
+              "recall": 1.0,
+              "f1": 0.638095238095238,
+              "support": 134
+            },
+            "UP": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "support": 94
+            }
+          }
+        },
+        "TCS": {
+          "rows": 286,
+          "accuracy": 0.5244755244755245,
+          "macro_f1": 0.2293577981651376,
+          "balanced_accuracy": 0.3333333333333333,
+          "log_loss": 1.0232084241308839,
+          "true_class_counts": {
+            "DOWN": 56,
+            "SIDEWAYS": 150,
+            "UP": 80
+          },
+          "predicted_class_counts": {
+            "DOWN": 0,
+            "SIDEWAYS": 286,
+            "UP": 0
+          },
+          "confusion_matrix": {
+            "labels_in_row_and_column_order": [
+              "DOWN",
+              "SIDEWAYS",
+              "UP"
+            ],
+            "rows_actual_columns_predicted": [
+              [
+                0,
+                56,
+                0
+              ],
+              [
+                0,
+                150,
+                0
+              ],
+              [
+                0,
+                80,
+                0
+              ]
+            ]
+          },
+          "per_class": {
+            "DOWN": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "support": 56
+            },
+            "SIDEWAYS": {
+              "precision": 0.5244755244755245,
+              "recall": 1.0,
+              "f1": 0.6880733944954128,
+              "support": 150
+            },
+            "UP": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "support": 80
+            }
+          }
+        }
+      }
+    },
+    "saved_production_calibrated_model": {
+      "model_version": "v1",
+      "metrics": {
+        "rows": 2288,
+        "accuracy": 0.5297202797202797,
+        "macro_f1": 0.23182735813763067,
+        "balanced_accuracy": 0.33384853168469864,
+        "log_loss": 1.0153455219447725,
+        "true_class_counts": {
+          "DOWN": 430,
+          "SIDEWAYS": 1211,
+          "UP": 647
+        },
+        "predicted_class_counts": {
+          "DOWN": 0,
+          "SIDEWAYS": 2287,
+          "UP": 1
+        },
+        "confusion_matrix": {
+          "labels_in_row_and_column_order": [
+            "DOWN",
+            "SIDEWAYS",
+            "UP"
+          ],
+          "rows_actual_columns_predicted": [
+            [
+              0,
+              430,
+              0
+            ],
+            [
+              0,
+              1211,
+              0
+            ],
+            [
+              0,
+              646,
+              1
+            ]
+          ]
+        },
+        "per_class": {
+          "DOWN": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1": 0.0,
+            "support": 430
+          },
+          "SIDEWAYS": {
+            "precision": 0.5295146480104941,
+            "recall": 1.0,
+            "f1": 0.6923956546598056,
+            "support": 1211
+          },
+          "UP": {
+            "precision": 1.0,
+            "recall": 0.0015455950540958269,
+            "f1": 0.0030864197530864196,
+            "support": 647
+          }
+        },
+        "probability_distributions": {
+          "overall_by_predicted_class": {
+            "DOWN": {
+              "mean": 0.22451281039128687,
+              "std": 0.004963379984211683,
+              "min": 0.21331465924821558,
+              "p05": 0.2166587102480345,
+              "p25": 0.22066696249141535,
+              "median": 0.2245535202882066,
+              "p75": 0.2281979328721388,
+              "p95": 0.23301641530745587,
+              "max": 0.23961514880868334
+            },
+            "SIDEWAYS": {
+              "mean": 0.4728960867466204,
+              "std": 0.025654122327009917,
+              "min": 0.3798772013740011,
+              "p05": 0.4294079458983226,
+              "p25": 0.4559352428853177,
+              "median": 0.4736761896981159,
+              "p75": 0.4931909769765637,
+              "p95": 0.5114838207723961,
+              "max": 0.5288441914269311
+            },
+            "UP": {
+              "mean": 0.30259110286209273,
+              "std": 0.021880569312015014,
+              "min": 0.25332174400022167,
+              "p05": 0.2684345741104937,
+              "p25": 0.2862507195036874,
+              "median": 0.3023624211187238,
+              "p75": 0.31686467884023356,
+              "p95": 0.33932129879752904,
+              "max": 0.3898229744907496
+            }
+          },
+          "mean_probability_by_actual_class": {
+            "DOWN": {
+              "DOWN": 0.22384952241227596,
+              "SIDEWAYS": 0.477294467523535,
+              "UP": 0.29885601006418905
+            },
+            "SIDEWAYS": {
+              "DOWN": 0.2244346268021135,
+              "SIDEWAYS": 0.4727982570327556,
+              "UP": 0.3027671161651309
+            },
+            "UP": {
+              "DOWN": 0.22509997292214246,
+              "SIDEWAYS": 0.4701560064520564,
+              "UP": 0.3047440206258012
+            }
+          }
+        },
+        "per_stock": {
+          "HDFCBANK": {
+            "rows": 286,
+            "accuracy": 0.5769230769230769,
+            "macro_f1": 0.24390243902439024,
+            "balanced_accuracy": 0.3333333333333333,
+            "log_loss": 0.9881303890261727,
+            "true_class_counts": {
+              "DOWN": 48,
+              "SIDEWAYS": 165,
+              "UP": 73
+            },
+            "predicted_class_counts": {
+              "DOWN": 0,
+              "SIDEWAYS": 286,
+              "UP": 0
+            },
+            "confusion_matrix": {
+              "labels_in_row_and_column_order": [
+                "DOWN",
+                "SIDEWAYS",
+                "UP"
+              ],
+              "rows_actual_columns_predicted": [
+                [
+                  0,
+                  48,
+                  0
+                ],
+                [
+                  0,
+                  165,
+                  0
+                ],
+                [
+                  0,
+                  73,
+                  0
+                ]
+              ]
+            },
+            "per_class": {
+              "DOWN": {
+                "precision": 0.0,
+                "recall": 0.0,
+                "f1": 0.0,
+                "support": 48
+              },
+              "SIDEWAYS": {
+                "precision": 0.5769230769230769,
+                "recall": 1.0,
+                "f1": 0.7317073170731707,
+                "support": 165
+              },
+              "UP": {
+                "precision": 0.0,
+                "recall": 0.0,
+                "f1": 0.0,
+                "support": 73
+              }
+            }
+          },
+          "ICICIBANK": {
+            "rows": 286,
+            "accuracy": 0.5769230769230769,
+            "macro_f1": 0.24390243902439024,
+            "balanced_accuracy": 0.3333333333333333,
+            "log_loss": 0.9691751262326392,
+            "true_class_counts": {
+              "DOWN": 37,
+              "SIDEWAYS": 165,
+              "UP": 84
+            },
+            "predicted_class_counts": {
+              "DOWN": 0,
+              "SIDEWAYS": 286,
+              "UP": 0
+            },
+            "confusion_matrix": {
+              "labels_in_row_and_column_order": [
+                "DOWN",
+                "SIDEWAYS",
+                "UP"
+              ],
+              "rows_actual_columns_predicted": [
+                [
+                  0,
+                  37,
+                  0
+                ],
+                [
+                  0,
+                  165,
+                  0
+                ],
+                [
+                  0,
+                  84,
+                  0
+                ]
+              ]
+            },
+            "per_class": {
+              "DOWN": {
+                "precision": 0.0,
+                "recall": 0.0,
+                "f1": 0.0,
+                "support": 37
+              },
+              "SIDEWAYS": {
+                "precision": 0.5769230769230769,
+                "recall": 1.0,
+                "f1": 0.7317073170731707,
+                "support": 165
+              },
+              "UP": {
+                "precision": 0.0,
+                "recall": 0.0,
+                "f1": 0.0,
+                "support": 84
+              }
+            }
+          },
+          "INFY": {
+            "rows": 286,
+            "accuracy": 0.493006993006993,
+            "macro_f1": 0.22014051522248243,
+            "balanced_accuracy": 0.3333333333333333,
+            "log_loss": 1.0376679836163072,
+            "true_class_counts": {
+              "DOWN": 53,
+              "SIDEWAYS": 141,
+              "UP": 92
+            },
+            "predicted_class_counts": {
+              "DOWN": 0,
+              "SIDEWAYS": 286,
+              "UP": 0
+            },
+            "confusion_matrix": {
+              "labels_in_row_and_column_order": [
+                "DOWN",
+                "SIDEWAYS",
+                "UP"
+              ],
+              "rows_actual_columns_predicted": [
+                [
+                  0,
+                  53,
+                  0
+                ],
+                [
+                  0,
+                  141,
+                  0
+                ],
+                [
+                  0,
+                  92,
+                  0
+                ]
+              ]
+            },
+            "per_class": {
+              "DOWN": {
+                "precision": 0.0,
+                "recall": 0.0,
+                "f1": 0.0,
+                "support": 53
+              },
+              "SIDEWAYS": {
+                "precision": 0.493006993006993,
+                "recall": 1.0,
+                "f1": 0.6604215456674473,
+                "support": 141
+              },
+              "UP": {
+                "precision": 0.0,
+                "recall": 0.0,
+                "f1": 0.0,
+                "support": 92
+              }
+            }
+          },
+          "ITC": {
+            "rows": 286,
+            "accuracy": 0.6153846153846154,
+            "macro_f1": 0.25396825396825395,
+            "balanced_accuracy": 0.3333333333333333,
+            "log_loss": 0.9699731522589669,
+            "true_class_counts": {
+              "DOWN": 49,
+              "SIDEWAYS": 176,
+              "UP": 61
+            },
+            "predicted_class_counts": {
+              "DOWN": 0,
+              "SIDEWAYS": 286,
+              "UP": 0
+            },
+            "confusion_matrix": {
+              "labels_in_row_and_column_order": [
+                "DOWN",
+                "SIDEWAYS",
+                "UP"
+              ],
+              "rows_actual_columns_predicted": [
+                [
+                  0,
+                  49,
+                  0
+                ],
+                [
+                  0,
+                  176,
+                  0
+                ],
+                [
+                  0,
+                  61,
+                  0
+                ]
+              ]
+            },
+            "per_class": {
+              "DOWN": {
+                "precision": 0.0,
+                "recall": 0.0,
+                "f1": 0.0,
+                "support": 49
+              },
+              "SIDEWAYS": {
+                "precision": 0.6153846153846154,
+                "recall": 1.0,
+                "f1": 0.7619047619047619,
+                "support": 176
+              },
+              "UP": {
+                "precision": 0.0,
+                "recall": 0.0,
+                "f1": 0.0,
+                "support": 61
+              }
+            }
+          },
+          "LT": {
+            "rows": 286,
+            "accuracy": 0.4160839160839161,
+            "macro_f1": 0.2020053679039854,
+            "balanced_accuracy": 0.3367697594501718,
+            "log_loss": 1.0802519029825308,
+            "true_class_counts": {
+              "DOWN": 71,
+              "SIDEWAYS": 118,
+              "UP": 97
+            },
+            "predicted_class_counts": {
+              "DOWN": 0,
+              "SIDEWAYS": 285,
+              "UP": 1
+            },
+            "confusion_matrix": {
+              "labels_in_row_and_column_order": [
+                "DOWN",
+                "SIDEWAYS",
+                "UP"
+              ],
+              "rows_actual_columns_predicted": [
+                [
+                  0,
+                  71,
+                  0
+                ],
+                [
+                  0,
+                  118,
+                  0
+                ],
+                [
+                  0,
+                  96,
+                  1
+                ]
+              ]
+            },
+            "per_class": {
+              "DOWN": {
+                "precision": 0.0,
+                "recall": 0.0,
+                "f1": 0.0,
+                "support": 71
+              },
+              "SIDEWAYS": {
+                "precision": 0.41403508771929826,
+                "recall": 1.0,
+                "f1": 0.5856079404466501,
+                "support": 118
+              },
+              "UP": {
+                "precision": 1.0,
+                "recall": 0.010309278350515464,
+                "f1": 0.02040816326530612,
+                "support": 97
+              }
+            }
+          },
+          "RELIANCE": {
+            "rows": 286,
+            "accuracy": 0.5664335664335665,
+            "macro_f1": 0.24107142857142858,
+            "balanced_accuracy": 0.3333333333333333,
+            "log_loss": 1.008827967896183,
+            "true_class_counts": {
+              "DOWN": 58,
+              "SIDEWAYS": 162,
+              "UP": 66
+            },
+            "predicted_class_counts": {
+              "DOWN": 0,
+              "SIDEWAYS": 286,
+              "UP": 0
+            },
+            "confusion_matrix": {
+              "labels_in_row_and_column_order": [
+                "DOWN",
+                "SIDEWAYS",
+                "UP"
+              ],
+              "rows_actual_columns_predicted": [
+                [
+                  0,
+                  58,
+                  0
+                ],
+                [
+                  0,
+                  162,
+                  0
+                ],
+                [
+                  0,
+                  66,
+                  0
+                ]
+              ]
+            },
+            "per_class": {
+              "DOWN": {
+                "precision": 0.0,
+                "recall": 0.0,
+                "f1": 0.0,
+                "support": 58
+              },
+              "SIDEWAYS": {
+                "precision": 0.5664335664335665,
+                "recall": 1.0,
+                "f1": 0.7232142857142857,
+                "support": 162
+              },
+              "UP": {
+                "precision": 0.0,
+                "recall": 0.0,
+                "f1": 0.0,
+                "support": 66
+              }
+            }
+          },
+          "SBIN": {
+            "rows": 286,
+            "accuracy": 0.46853146853146854,
+            "macro_f1": 0.2126984126984127,
+            "balanced_accuracy": 0.3333333333333333,
+            "log_loss": 1.045544238956572,
+            "true_class_counts": {
+              "DOWN": 58,
+              "SIDEWAYS": 134,
+              "UP": 94
+            },
+            "predicted_class_counts": {
+              "DOWN": 0,
+              "SIDEWAYS": 286,
+              "UP": 0
+            },
+            "confusion_matrix": {
+              "labels_in_row_and_column_order": [
+                "DOWN",
+                "SIDEWAYS",
+                "UP"
+              ],
+              "rows_actual_columns_predicted": [
+                [
+                  0,
+                  58,
+                  0
+                ],
+                [
+                  0,
+                  134,
+                  0
+                ],
+                [
+                  0,
+                  94,
+                  0
+                ]
+              ]
+            },
+            "per_class": {
+              "DOWN": {
+                "precision": 0.0,
+                "recall": 0.0,
+                "f1": 0.0,
+                "support": 58
+              },
+              "SIDEWAYS": {
+                "precision": 0.46853146853146854,
+                "recall": 1.0,
+                "f1": 0.638095238095238,
+                "support": 134
+              },
+              "UP": {
+                "precision": 0.0,
+                "recall": 0.0,
+                "f1": 0.0,
+                "support": 94
+              }
+            }
+          },
+          "TCS": {
+            "rows": 286,
+            "accuracy": 0.5244755244755245,
+            "macro_f1": 0.2293577981651376,
+            "balanced_accuracy": 0.3333333333333333,
+            "log_loss": 1.0231934145888073,
+            "true_class_counts": {
+              "DOWN": 56,
+              "SIDEWAYS": 150,
+              "UP": 80
+            },
+            "predicted_class_counts": {
+              "DOWN": 0,
+              "SIDEWAYS": 286,
+              "UP": 0
+            },
+            "confusion_matrix": {
+              "labels_in_row_and_column_order": [
+                "DOWN",
+                "SIDEWAYS",
+                "UP"
+              ],
+              "rows_actual_columns_predicted": [
+                [
+                  0,
+                  56,
+                  0
+                ],
+                [
+                  0,
+                  150,
+                  0
+                ],
+                [
+                  0,
+                  80,
+                  0
+                ]
+              ]
+            },
+            "per_class": {
+              "DOWN": {
+                "precision": 0.0,
+                "recall": 0.0,
+                "f1": 0.0,
+                "support": 56
+              },
+              "SIDEWAYS": {
+                "precision": 0.5244755244755245,
+                "recall": 1.0,
+                "f1": 0.6880733944954128,
+                "support": 150
+              },
+              "UP": {
+                "precision": 0.0,
+                "recall": 0.0,
+                "f1": 0.0,
+                "support": 80
+              }
+            }
+          }
+        }
+      },
+      "fold_ensemble_before_calibration": {
+        "rows": 2288,
+        "accuracy": 0.44886363636363635,
+        "macro_f1": 0.3327861952861953,
+        "balanced_accuracy": 0.3405557368918933,
+        "log_loss": 1.0717097054290774,
+        "true_class_counts": {
+          "DOWN": 430,
+          "SIDEWAYS": 1211,
+          "UP": 647
+        },
+        "predicted_class_counts": {
+          "DOWN": 290,
+          "SIDEWAYS": 1589,
+          "UP": 409
+        },
+        "confusion_matrix": {
+          "labels_in_row_and_column_order": [
+            "DOWN",
+            "SIDEWAYS",
+            "UP"
+          ],
+          "rows_actual_columns_predicted": [
+            [
+              50,
+              309,
+              71
+            ],
+            [
+              170,
+              840,
+              201
+            ],
+            [
+              70,
+              440,
+              137
+            ]
+          ]
+        },
+        "per_class": {
+          "DOWN": {
+            "precision": 0.1724137931034483,
+            "recall": 0.11627906976744186,
+            "f1": 0.1388888888888889,
+            "support": 430
+          },
+          "SIDEWAYS": {
+            "precision": 0.5286343612334802,
+            "recall": 0.6936416184971098,
+            "f1": 0.6,
+            "support": 1211
+          },
+          "UP": {
+            "precision": 0.33496332518337407,
+            "recall": 0.2117465224111283,
+            "f1": 0.25946969696969696,
+            "support": 647
+          }
+        },
+        "probability_distributions": {
+          "overall_by_predicted_class": {
+            "DOWN": {
+              "mean": 0.3113606549573781,
+              "std": 0.04485637571535294,
+              "min": 0.20500215774891056,
+              "p05": 0.2516993797625718,
+              "p25": 0.2819839434458069,
+              "median": 0.30568974071178956,
+              "p75": 0.3333259364912018,
+              "p95": 0.39543674528182043,
+              "max": 0.5828900047800619
+            },
+            "SIDEWAYS": {
+              "mean": 0.38286104609504684,
+              "std": 0.058477618211807955,
+              "min": 0.1264665318594765,
+              "p05": 0.28330783129333253,
+              "p25": 0.3449669102325207,
+              "median": 0.3850174760272514,
+              "p75": 0.42619194284655465,
+              "p95": 0.4696132188592025,
+              "max": 0.52977666706764
+            },
+            "UP": {
+              "mean": 0.3057782989475755,
+              "std": 0.052158584283424285,
+              "min": 0.1763047921418249,
+              "p05": 0.22540491486347405,
+              "p25": 0.26867459673297006,
+              "median": 0.30284350414370254,
+              "p75": 0.3410711515708472,
+              "p95": 0.394412404502348,
+              "max": 0.4865269445214949
+            }
+          },
+          "mean_probability_by_actual_class": {
+            "DOWN": {
+              "DOWN": 0.3104156102114831,
+              "SIDEWAYS": 0.3923011801203437,
+              "UP": 0.29728320966817356
+            },
+            "SIDEWAYS": {
+              "DOWN": 0.3123642913562177,
+              "SIDEWAYS": 0.3820699518896244,
+              "UP": 0.3055657567541583
+            },
+            "UP": {
+              "DOWN": 0.31011021533101024,
+              "SIDEWAYS": 0.37806778095113486,
+              "UP": 0.3118220037178554
+            }
+          }
+        },
+        "per_stock": {
+          "HDFCBANK": {
+            "rows": 286,
+            "accuracy": 0.4965034965034965,
+            "macro_f1": 0.35502674622102254,
+            "balanced_accuracy": 0.3571502698215027,
+            "log_loss": 1.055446899464627,
+            "true_class_counts": {
+              "DOWN": 48,
+              "SIDEWAYS": 165,
+              "UP": 73
+            },
+            "predicted_class_counts": {
+              "DOWN": 31,
+              "SIDEWAYS": 213,
+              "UP": 42
+            },
+            "confusion_matrix": {
+              "labels_in_row_and_column_order": [
+                "DOWN",
+                "SIDEWAYS",
+                "UP"
+              ],
+              "rows_actual_columns_predicted": [
+                [
+                  6,
+                  40,
+                  2
+                ],
+                [
+                  21,
+                  120,
+                  24
+                ],
+                [
+                  4,
+                  53,
+                  16
+                ]
+              ]
+            },
+            "per_class": {
+              "DOWN": {
+                "precision": 0.1935483870967742,
+                "recall": 0.125,
+                "f1": 0.1518987341772152,
+                "support": 48
+              },
+              "SIDEWAYS": {
+                "precision": 0.5633802816901409,
+                "recall": 0.7272727272727273,
+                "f1": 0.6349206349206349,
+                "support": 165
+              },
+              "UP": {
+                "precision": 0.38095238095238093,
+                "recall": 0.2191780821917808,
+                "f1": 0.2782608695652174,
+                "support": 73
+              }
+            }
+          },
+          "ICICIBANK": {
+            "rows": 286,
+            "accuracy": 0.506993006993007,
+            "macro_f1": 0.3079053141875307,
+            "balanced_accuracy": 0.3283354783354783,
+            "log_loss": 1.0297747161862436,
+            "true_class_counts": {
+              "DOWN": 37,
+              "SIDEWAYS": 165,
+              "UP": 84
+            },
+            "predicted_class_counts": {
+              "DOWN": 19,
+              "SIDEWAYS": 223,
+              "UP": 44
+            },
+            "confusion_matrix": {
+              "labels_in_row_and_column_order": [
+                "DOWN",
+                "SIDEWAYS",
+                "UP"
+              ],
+              "rows_actual_columns_predicted": [
+                [
+                  2,
+                  25,
+                  10
+                ],
+                [
+                  10,
+                  132,
+                  23
+                ],
+                [
+                  7,
+                  66,
+                  11
+                ]
+              ]
+            },
+            "per_class": {
+              "DOWN": {
+                "precision": 0.10526315789473684,
+                "recall": 0.05405405405405406,
+                "f1": 0.07142857142857142,
+                "support": 37
+              },
+              "SIDEWAYS": {
+                "precision": 0.5919282511210763,
+                "recall": 0.8,
+                "f1": 0.6804123711340206,
+                "support": 165
+              },
+              "UP": {
+                "precision": 0.25,
+                "recall": 0.13095238095238096,
+                "f1": 0.171875,
+                "support": 84
+              }
+            }
+          },
+          "INFY": {
+            "rows": 286,
+            "accuracy": 0.3881118881118881,
+            "macro_f1": 0.33936244720367403,
+            "balanced_accuracy": 0.3411401819497049,
+            "log_loss": 1.095662719321177,
+            "true_class_counts": {
+              "DOWN": 53,
+              "SIDEWAYS": 141,
+              "UP": 92
+            },
+            "predicted_class_counts": {
+              "DOWN": 54,
+              "SIDEWAYS": 172,
+              "UP": 60
+            },
+            "confusion_matrix": {
+              "labels_in_row_and_column_order": [
+                "DOWN",
+                "SIDEWAYS",
+                "UP"
+              ],
+              "rows_actual_columns_predicted": [
+                [
+                  13,
+                  35,
+                  5
+                ],
+                [
+                  32,
+                  76,
+                  33
+                ],
+                [
+                  9,
+                  61,
+                  22
+                ]
+              ]
+            },
+            "per_class": {
+              "DOWN": {
+                "precision": 0.24074074074074073,
+                "recall": 0.24528301886792453,
+                "f1": 0.24299065420560748,
+                "support": 53
+              },
+              "SIDEWAYS": {
+                "precision": 0.4418604651162791,
+                "recall": 0.5390070921985816,
+                "f1": 0.48562300319488816,
+                "support": 141
+              },
+              "UP": {
+                "precision": 0.36666666666666664,
+                "recall": 0.2391304347826087,
+                "f1": 0.2894736842105263,
+                "support": 92
+              }
+            }
+          },
+          "ITC": {
+            "rows": 286,
+            "accuracy": 0.5559440559440559,
+            "macro_f1": 0.36368751817710504,
+            "balanced_accuracy": 0.37030918924947026,
+            "log_loss": 1.0400651335156692,
+            "true_class_counts": {
+              "DOWN": 49,
+              "SIDEWAYS": 176,
+              "UP": 61
+            },
+            "predicted_class_counts": {
+              "DOWN": 32,
+              "SIDEWAYS": 228,
+              "UP": 26
+            },
+            "confusion_matrix": {
+              "labels_in_row_and_column_order": [
+                "DOWN",
+                "SIDEWAYS",
+                "UP"
+              ],
+              "rows_actual_columns_predicted": [
+                [
+                  9,
+                  38,
+                  2
+                ],
+                [
+                  16,
+                  143,
+                  17
+                ],
+                [
+                  7,
+                  47,
+                  7
+                ]
+              ]
+            },
+            "per_class": {
+              "DOWN": {
+                "precision": 0.28125,
+                "recall": 0.1836734693877551,
+                "f1": 0.2222222222222222,
+                "support": 49
+              },
+              "SIDEWAYS": {
+                "precision": 0.6271929824561403,
+                "recall": 0.8125,
+                "f1": 0.7079207920792079,
+                "support": 176
+              },
+              "UP": {
+                "precision": 0.2692307692307692,
+                "recall": 0.11475409836065574,
+                "f1": 0.16091954022988506,
+                "support": 61
+              }
+            }
+          },
+          "LT": {
+            "rows": 286,
+            "accuracy": 0.3741258741258741,
+            "macro_f1": 0.3117427772600187,
+            "balanced_accuracy": 0.3306741843102414,
+            "log_loss": 1.0927482933296127,
+            "true_class_counts": {
+              "DOWN": 71,
+              "SIDEWAYS": 118,
+              "UP": 97
+            },
+            "predicted_class_counts": {
+              "DOWN": 45,
+              "SIDEWAYS": 190,
+              "UP": 51
+            },
+            "confusion_matrix": {
+              "labels_in_row_and_column_order": [
+                "DOWN",
+                "SIDEWAYS",
+                "UP"
+              ],
+              "rows_actual_columns_predicted": [
+                [
+                  8,
+                  49,
+                  14
+                ],
+                [
+                  26,
+                  77,
+                  15
+                ],
+                [
+                  11,
+                  64,
+                  22
+                ]
+              ]
+            },
+            "per_class": {
+              "DOWN": {
+                "precision": 0.17777777777777778,
+                "recall": 0.11267605633802817,
+                "f1": 0.13793103448275862,
+                "support": 71
+              },
+              "SIDEWAYS": {
+                "precision": 0.4052631578947368,
+                "recall": 0.652542372881356,
+                "f1": 0.5,
+                "support": 118
+              },
+              "UP": {
+                "precision": 0.43137254901960786,
+                "recall": 0.2268041237113402,
+                "f1": 0.2972972972972973,
+                "support": 97
+              }
+            }
+          },
+          "RELIANCE": {
+            "rows": 286,
+            "accuracy": 0.4230769230769231,
+            "macro_f1": 0.29354182557843883,
+            "balanced_accuracy": 0.300340570455513,
+            "log_loss": 1.0894539975444355,
+            "true_class_counts": {
+              "DOWN": 58,
+              "SIDEWAYS": 162,
+              "UP": 66
+            },
+            "predicted_class_counts": {
+              "DOWN": 37,
+              "SIDEWAYS": 183,
+              "UP": 66
+            },
+            "confusion_matrix": {
+              "labels_in_row_and_column_order": [
+                "DOWN",
+                "SIDEWAYS",
+                "UP"
+              ],
+              "rows_actual_columns_predicted": [
+                [
+                  5,
+                  33,
+                  20
+                ],
+                [
+                  22,
+                  105,
+                  35
+                ],
+                [
+                  10,
+                  45,
+                  11
+                ]
+              ]
+            },
+            "per_class": {
+              "DOWN": {
+                "precision": 0.13513513513513514,
+                "recall": 0.08620689655172414,
+                "f1": 0.10526315789473684,
+                "support": 58
+              },
+              "SIDEWAYS": {
+                "precision": 0.5737704918032787,
+                "recall": 0.6481481481481481,
+                "f1": 0.6086956521739131,
+                "support": 162
+              },
+              "UP": {
+                "precision": 0.16666666666666666,
+                "recall": 0.16666666666666666,
+                "f1": 0.16666666666666666,
+                "support": 66
+              }
+            }
+          },
+          "SBIN": {
+            "rows": 286,
+            "accuracy": 0.40559440559440557,
+            "macro_f1": 0.31311158596738026,
+            "balanced_accuracy": 0.3257739183758391,
+            "log_loss": 1.0900978846064528,
+            "true_class_counts": {
+              "DOWN": 58,
+              "SIDEWAYS": 134,
+              "UP": 94
+            },
+            "predicted_class_counts": {
+              "DOWN": 37,
+              "SIDEWAYS": 180,
+              "UP": 69
+            },
+            "confusion_matrix": {
+              "labels_in_row_and_column_order": [
+                "DOWN",
+                "SIDEWAYS",
+                "UP"
+              ],
+              "rows_actual_columns_predicted": [
+                [
+                  2,
+                  47,
+                  9
+                ],
+                [
+                  18,
+                  85,
+                  31
+                ],
+                [
+                  17,
+                  48,
+                  29
+                ]
+              ]
+            },
+            "per_class": {
+              "DOWN": {
+                "precision": 0.05405405405405406,
+                "recall": 0.034482758620689655,
+                "f1": 0.042105263157894736,
+                "support": 58
+              },
+              "SIDEWAYS": {
+                "precision": 0.4722222222222222,
+                "recall": 0.6343283582089553,
+                "f1": 0.5414012738853503,
+                "support": 134
+              },
+              "UP": {
+                "precision": 0.42028985507246375,
+                "recall": 0.30851063829787234,
+                "f1": 0.3558282208588957,
+                "support": 94
+              }
+            }
+          },
+          "TCS": {
+            "rows": 286,
+            "accuracy": 0.4405594405594406,
+            "macro_f1": 0.32760786287503846,
+            "balanced_accuracy": 0.3355952380952381,
+            "log_loss": 1.0804279994644017,
+            "true_class_counts": {
+              "DOWN": 56,
+              "SIDEWAYS": 150,
+              "UP": 80
+            },
+            "predicted_class_counts": {
+              "DOWN": 35,
+              "SIDEWAYS": 200,
+              "UP": 51
+            },
+            "confusion_matrix": {
+              "labels_in_row_and_column_order": [
+                "DOWN",
+                "SIDEWAYS",
+                "UP"
+              ],
+              "rows_actual_columns_predicted": [
+                [
+                  5,
+                  42,
+                  9
+                ],
+                [
+                  25,
+                  102,
+                  23
+                ],
+                [
+                  5,
+                  56,
+                  19
+                ]
+              ]
+            },
+            "per_class": {
+              "DOWN": {
+                "precision": 0.14285714285714285,
+                "recall": 0.08928571428571429,
+                "f1": 0.10989010989010989,
+                "support": 56
+              },
+              "SIDEWAYS": {
+                "precision": 0.51,
+                "recall": 0.68,
+                "f1": 0.5828571428571429,
+                "support": 150
+              },
+              "UP": {
+                "precision": 0.37254901960784315,
+                "recall": 0.2375,
+                "f1": 0.2900763358778626,
+                "support": 80
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

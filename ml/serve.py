@@ -13,6 +13,7 @@ import logging
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Optional
+from zoneinfo import ZoneInfo
 
 import joblib
 import numpy as np
@@ -20,7 +21,8 @@ import pandas as pd
 import yaml
 from fastapi import FastAPI, HTTPException, Header, Depends
 from fastapi.responses import JSONResponse
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
+from db_config import DatabaseConfigurationError, get_database_url
 
 # ── Logging ─────────────────────────────────────────────────────
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s")
@@ -31,8 +33,8 @@ CONFIG_PATH = Path(__file__).parent / "config.yaml"
 with open(CONFIG_PATH) as f:
     CONFIG = yaml.safe_load(f)
 
-MODEL_DIR   = Path(__file__).parent / CONFIG["output"]["model_dir"]
-MODEL_TOKEN = os.environ.get("ML_SERVICE_TOKEN", "dev_ml_token")
+MODEL_DIR   = Path(__file__).resolve().parent / CONFIG["output"]["model_dir"]
+MODEL_TOKEN = os.environ.get("ML_SERVICE_TOKEN")
 
 # ── Load model artifacts ─────────────────────────────────────────
 ARTIFACTS: dict = {}
@@ -56,6 +58,15 @@ def load_artifacts():
     else:
         ARTIFACTS["meta"] = {}
 
+    expected_features = ARTIFACTS["meta"].get("feature_list")
+    if not expected_features:
+        raise RuntimeError("Model metadata is missing feature_list; refusing unsafe inference")
+    model_features = getattr(ARTIFACTS["model"], "feature_names_in_", None)
+    if model_features is not None and list(model_features) != expected_features:
+        raise RuntimeError("Model and metadata feature order do not match")
+    if ARTIFACTS["meta"].get("model_version", version) != version:
+        raise RuntimeError("Model version does not match its metadata")
+
     log.info(f"Model loaded: version={version}")
     return True
 
@@ -71,6 +82,8 @@ app = FastAPI(
 
 # ── Auth dependency ──────────────────────────────────────────────
 def verify_token(x_service_token: Optional[str] = Header(None)):
+    if not MODEL_TOKEN:
+        raise HTTPException(status_code=503, detail="ML_SERVICE_TOKEN is not configured")
     if x_service_token != MODEL_TOKEN:
         raise HTTPException(status_code=401, detail="Invalid service token")
 
@@ -82,7 +95,7 @@ def compute_features(df: pd.DataFrame) -> pd.DataFrame:
     """
     cfg = CONFIG["features"]
     df = df.copy().sort_values("Date").reset_index(drop=True)
-    df["daily_return"] = df["Close"].pct_change()
+    df["daily_return"] = df["Close"].pct_change(fill_method=None)
 
     for w in cfg["moving_averages"]:
         if len(df) >= w:
@@ -96,6 +109,8 @@ def compute_features(df: pd.DataFrame) -> pd.DataFrame:
     loss  = (-delta.clip(upper=0)).rolling(rsi_w).mean()
     rs    = gain / loss.replace(0, np.nan)
     df["rsi"] = 100 - (100 / (1 + rs))
+    df.loc[(loss == 0) & (gain > 0), "rsi"] = 100
+    df.loc[(loss == 0) & (gain == 0), "rsi"] = 50
 
     # MACD
     fast, slow, sig = cfg["macd_fast"], cfg["macd_slow"], cfg["macd_signal"]
@@ -107,22 +122,24 @@ def compute_features(df: pd.DataFrame) -> pd.DataFrame:
 
     # Volatility and volume change
     df["volatility"]    = df["daily_return"].rolling(cfg["volatility_window"]).std()
-    df["volume_change"] = df["Volume"].pct_change(cfg["volume_change_window"])
+    df["volume_change"] = df["Volume"].pct_change(cfg["volume_change_window"], fill_method=None)
 
     return df
 
 # ── Schemas ──────────────────────────────────────────────────────
 class PredictRequest(BaseModel):
-    symbol: str
+    symbol: str = Field(min_length=1, max_length=20, pattern=r"^[A-Za-z0-9.\-]+$")
 
 class PredictResponse(BaseModel):
     symbol: str
     prediction: str           # UP | DOWN | SIDEWAYS
     probabilities: dict       # {UP: float, DOWN: float, SIDEWAYS: float}
+    confidence: Optional[float]
     calibrated: bool
     model_version: str
     data_source: str
     last_data_date: Optional[str]
+    horizon_days: int
     key_indicators: dict
     predicted_at: str
     disclaimer: str
@@ -162,61 +179,101 @@ def predict(req: PredictRequest):
     meta       = ARTIFACTS.get("meta", {})
     version    = ARTIFACTS.get("version", "unknown")
     features   = meta.get("feature_list", [])
-    data_source = meta.get("data_source", "UNKNOWN")
 
     # ── Load price data from DB ──────────────────────────────────
-    # Attempt DB, fall back to synthetic note
+    # Serve only approved real Yahoo Finance history.
     symbol_ns = req.symbol.upper().replace(".NS", "")
+    supported_symbols = {str(symbol).upper().removesuffix(".NS") for symbol in CONFIG.get("symbols", [])}
+    if supported_symbols and symbol_ns not in supported_symbols:
+        raise HTTPException(422, f"Unsupported symbol: {symbol_ns}")
 
+    if CONFIG.get("serving", {}).get("data_source", "db") != "db":
+        raise HTTPException(503, "Serving is configured for a non-database source")
+    try:
+        db_url = get_database_url()
+    except DatabaseConfigurationError as exc:
+        raise HTTPException(503, str(exc)) from exc
+    serving_cfg = CONFIG.get("serving", {})
+    approved_source = serving_cfg.get("approved_data_source", "YFINANCE_NS")
+    if approved_source != "YFINANCE_NS":
+        raise HTTPException(503, "Serving is configured with an unsupported data source")
+    adjustment = CONFIG.get("data", {}).get("adjustment", "auto")
+    adjustment = "auto" if adjustment is True else "raw" if adjustment is False else str(adjustment).lower()
+    if adjustment not in {"auto", "raw"}:
+        raise HTTPException(503, "Configured price adjustment mode is invalid")
     try:
         import psycopg2
-        db_url = os.environ.get("DATABASE_URL", "")
-        conn   = psycopg2.connect(db_url)
-        df     = pd.read_sql(
-            "SELECT trade_date AS \"Date\", open AS \"Open\", high AS \"High\", "
-            "low AS \"Low\", close AS \"Close\", volume AS \"Volume\" "
-            "FROM historical_prices WHERE symbol=%s ORDER BY trade_date",
-            conn, params=(symbol_ns,)
-        )
-        conn.close()
-        df["Date"] = pd.to_datetime(df["Date"])
-        db_data_source = "DB"
+        with psycopg2.connect(db_url) as conn:
+            df = pd.read_sql(
+                "SELECT trade_date AS \"Date\", open AS \"Open\", high AS \"High\", "
+                "low AS \"Low\", close AS \"Close\", volume AS \"Volume\", data_source, price_adjustment "
+                "FROM historical_prices WHERE symbol=%s AND data_source=%s AND price_adjustment=%s ORDER BY trade_date",
+                conn, params=(symbol_ns, approved_source, adjustment)
+            )
+        if "data_source" not in df.columns:
+            raise ValueError("Historical price query did not return data_source")
+        sources = sorted({str(source) for source in df["data_source"].dropna()})
+        if not sources or sources != [approved_source] or len(df) == 0:
+            raise HTTPException(503, "No approved Yahoo Finance price data is available")
+        if "price_adjustment" not in df.columns or set(df["price_adjustment"].dropna().astype(str)) != {adjustment}:
+            raise HTTPException(503, "Yahoo Finance price adjustment provenance is missing or inconsistent")
+        df["Date"] = pd.to_datetime(df["Date"], errors="coerce")
+        latest_data_date = df["Date"].max()
+        if pd.isna(latest_data_date):
+            raise HTTPException(503, "Yahoo Finance price dates are unavailable")
+        latest_date = latest_data_date.date()
+        today_nse = datetime.now(ZoneInfo("Asia/Kolkata")).date()
+        max_age_days = int(serving_cfg.get("max_data_age_days", 7))
+        if max_age_days < 0:
+            raise HTTPException(503, "Configured data freshness limit is invalid")
+        if latest_date > today_nse or (today_nse - latest_date).days > max_age_days:
+            raise HTTPException(503, "Approved Yahoo Finance price data is stale")
+        db_data_source = approved_source
+    except HTTPException:
+        raise
     except Exception as e:
-        log.warning(f"DB load failed for {symbol_ns}: {e}. Using synthetic fallback.")
-        df = _synthetic_fallback(symbol_ns)
-        db_data_source = "SYNTHETIC_SAMPLE"
+        log.warning("DB load failed for %s (%s)", symbol_ns, type(e).__name__)
+        raise HTTPException(503, "Historical approved Yahoo Finance price data is unavailable") from e
 
+    required_columns = ["Date", "Open", "High", "Low", "Close", "Volume"]
+    missing_columns = [column for column in required_columns if column not in df.columns]
+    if missing_columns:
+        raise HTTPException(422, f"Historical data is missing columns: {missing_columns}")
+    df = df.replace([np.inf, -np.inf], np.nan).dropna(subset=required_columns)
+    df = df[(df["Close"] > 0) & (df["Volume"] >= 0)]
     if df.empty or len(df) < 60:
         raise HTTPException(422, f"Not enough price data for {symbol_ns} (need ≥60 rows).")
 
     df_feat   = compute_features(df)
-    last_row  = df_feat.dropna(subset=["rsi"]).iloc[-1]
+    valid_rows = df_feat.dropna(subset=["rsi"])
+    if valid_rows.empty:
+        raise HTTPException(422, "Price history is insufficient to calculate features")
+    last_row  = valid_rows.iloc[-1]
     last_date = str(df["Date"].iloc[-1].date()) if "Date" in df.columns else None
 
     # Build feature vector
-    if features:
-        try:
-            X = pd.DataFrame([last_row[features]])
-        except KeyError as e:
-            raise HTTPException(422, f"Feature mismatch: {e}")
-    else:
-        # Use all numeric columns except label columns
-        numeric_cols = df_feat.select_dtypes(include=[np.number]).columns.tolist()
-        X = pd.DataFrame([last_row[numeric_cols]])
-
-    X = X.fillna(0)
+    if not features:
+        raise HTTPException(503, "Model metadata has no feature list")
+    missing = [name for name in features if name not in df_feat.columns]
+    if missing:
+        raise HTTPException(503, f"Feature mismatch: missing {missing}")
+    X = pd.DataFrame([last_row[features]], columns=features)
+    X = X.replace([np.inf, -np.inf], np.nan).fillna(0)
 
     # Predict
     class_names = model.classes_
     if hasattr(model, "predict_proba"):
         probs = model.predict_proba(X)[0]
         pred  = class_names[np.argmax(probs)]
-        prob_dict = {str(c): round(float(p), 4) for c, p in zip(class_names, probs)}
+        prob_dict = {label: round(float(probs[list(class_names).index(label)]), 4)
+                     if label in class_names else 0.0 for label in ("UP", "DOWN", "SIDEWAYS")}
         calibrated = meta.get("calibrated", False)
+        confidence = round(float(np.max(probs)), 4)
     else:
         pred      = model.predict(X)[0]
         prob_dict = {}
         calibrated = False
+        confidence = None
 
     indicators = {
         "rsi":          round(float(last_row.get("rsi", 0)), 2),
@@ -230,10 +287,12 @@ def predict(req: PredictRequest):
         symbol        = symbol_ns,
         prediction    = str(pred),
         probabilities = prob_dict,
+        confidence    = confidence,
         calibrated    = calibrated,
         model_version = version,
         data_source   = db_data_source,
         last_data_date = last_date,
+        horizon_days  = int(CONFIG["labels"]["horizon_days"]),
         key_indicators = indicators,
         predicted_at  = datetime.now(timezone.utc).isoformat(),
         disclaimer    = (
@@ -252,22 +311,3 @@ def train_endpoint():
 
 
 # ── Synthetic fallback ───────────────────────────────────────────
-def _synthetic_fallback(symbol: str) -> pd.DataFrame:
-    """Return labelled synthetic price data when DB is unavailable."""
-    import numpy as np
-    rng  = np.random.default_rng(42)
-    n    = 500
-    base = {"RELIANCE": 2500, "TCS": 4000, "INFY": 1800, "HDFCBANK": 1700}.get(symbol, 1000)
-    closes = [base]
-    for _ in range(n - 1):
-        closes.append(closes[-1] * (1 + rng.normal(0, 0.015)))
-    dates = pd.bdate_range("2022-01-03", periods=n)
-    df = pd.DataFrame({
-        "Date":   dates,
-        "Open":   closes,
-        "High":   [c * (1 + rng.uniform(0, 0.01)) for c in closes],
-        "Low":    [c * (1 - rng.uniform(0, 0.01)) for c in closes],
-        "Close":  closes,
-        "Volume": rng.integers(500_000, 2_000_000, n),
-    })
-    return df

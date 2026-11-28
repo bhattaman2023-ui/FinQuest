@@ -2,6 +2,7 @@ import { Router } from 'express';
 import axios from 'axios';
 import { query } from '../db/pool';
 import { requireAuth, AuthRequest } from '../middleware/auth';
+import { mapMlPrediction } from '../utils/mlPrediction';
 
 export const insightsRouter = Router();
 
@@ -184,14 +185,18 @@ insightsRouter.get('/ml-prediction/:symbol', requireAuth, async (req, res, next)
 
       // Persist prediction
       const p = mlRes.data;
+      if (p.data_source !== 'YFINANCE_NS') {
+        throw new Error('ML service returned data without approved Yahoo Finance provenance');
+      }
+      const probabilities = p.probabilities ?? {};
       await query(
         `INSERT INTO prediction_results (symbol, prediction, confidence_up, confidence_down, confidence_side, model_version, data_source, last_data_date)
          VALUES ($1,$2,$3,$4,$5,$6,$7,$8)`,
-        [symbol, p.prediction, p.confidence_up ?? null, p.confidence_down ?? null, p.confidence_sideways ?? null,
-         p.model_version ?? 'unknown', p.data_source ?? 'SYNTHETIC_SAMPLE', p.last_data_date ?? null]
+        [symbol, p.prediction, probabilities.UP ?? null, probabilities.DOWN ?? null, probabilities.SIDEWAYS ?? null,
+         p.model_version ?? 'unknown', p.data_source, p.last_data_date ?? null]
       );
 
-      return res.json({ ...mlRes.data, source: 'ml_service' });
+      return res.json({ ...mapMlPrediction(p), source: 'ml_service' });
     } catch (mlErr) {
       // ML service down — return degraded state, never fake result
       console.warn('ML service unavailable:', (mlErr as Error).message);
@@ -205,26 +210,31 @@ insightsRouter.get('/ml-prediction/:symbol', requireAuth, async (req, res, next)
     };
     const cached = await query<PredRow>(
       `SELECT prediction, confidence_up, confidence_down, confidence_side, model_version, data_source, last_data_date, predicted_at
-       FROM prediction_results WHERE symbol=$1 ORDER BY predicted_at DESC LIMIT 1`,
+       FROM prediction_results
+       WHERE symbol=$1 AND data_source='YFINANCE_NS'
+         AND predicted_at > NOW() - INTERVAL '24 hours'
+         AND last_data_date >= CURRENT_DATE - INTERVAL '7 days'
+       ORDER BY predicted_at DESC LIMIT 1`,
       [symbol]
     );
 
     if (cached.rows.length > 0) {
       const c = cached.rows[0];
-      return res.json({
+      return res.json(mapMlPrediction({
         symbol,
         prediction:    c.prediction,
-        confidenceUp:  c.confidence_up ? parseFloat(c.confidence_up) : null,
-        confidenceDown: c.confidence_down ? parseFloat(c.confidence_down) : null,
-        confidenceSideways: c.confidence_side ? parseFloat(c.confidence_side) : null,
+        confidenceUp:  c.confidence_up == null ? null : parseFloat(c.confidence_up),
+        confidenceDown: c.confidence_down == null ? null : parseFloat(c.confidence_down),
+        confidenceSideways: c.confidence_side == null ? null : parseFloat(c.confidence_side),
         modelVersion:  c.model_version,
         dataSource:    c.data_source,
         lastDataDate:  c.last_data_date,
+        horizonDays: 5,
         predictedAt:   c.predicted_at,
         source:        'cached',
         mlServiceDown: true,
         disclaimer:    'This is an educational experiment. Not investment advice. Model accuracy is limited.',
-      });
+      }));
     }
 
     return res.status(503).json({
